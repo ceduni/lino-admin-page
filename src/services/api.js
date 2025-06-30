@@ -1,5 +1,5 @@
-const API_BASE_URL = 'https://lino-1.onrender.com';
-// const API_BASE_URL = 'http://localhost:3000'; // For local development, change to your local server URL
+// const API_BASE_URL = 'https://lino-1.onrender.com';
+const API_BASE_URL = 'http://localhost:3000'; // For local development, change to your local server URL
 
 
 export const tokenService = {
@@ -171,7 +171,6 @@ export const bookboxesAPI = {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
       },
     });
 
@@ -181,7 +180,100 @@ export const bookboxesAPI = {
     }
 
     return { message: 'Book box deleted successfully' };
+  },
+
+  updateBookBox: async (id, { name, image, longitude, latitude, infoText }) => {
+    const token = tokenService.getToken();
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    // If image is a URL string (from ImgBB), send as JSON
+    // If image is a File object, send as FormData
+    if (typeof image === 'string') {
+      const response = await fetch(`${API_BASE_URL}/bookboxes/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          image,
+          longitude,
+          latitude,
+          infoText
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update book box');
+      }
+
+      return data;
+    } else {
+      // Handle File object with FormData
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('image', image);
+      formData.append('longitude', longitude);
+      formData.append('latitude', latitude);
+      formData.append('infoText', infoText);
+
+      const response = await fetch(`${API_BASE_URL}/bookboxes/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update book box');
+      }
+
+      return data;
+    }
+  },
+
+  searchBookBoxes: async (filters = {}) => {
+    const token = tokenService.getToken();
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    if (filters.kw) queryParams.append('kw', filters.kw);
+    if (filters.cls) queryParams.append('cls', filters.cls);
+    if (filters.asc) queryParams.append('asc', filters.asc);
+    if (filters.longitude) queryParams.append('longitude', filters.longitude.toString());
+    if (filters.latitude) queryParams.append('latitude', filters.latitude.toString());
+
+    const queryString = queryParams.toString();
+    const url = `${API_BASE_URL}/bookboxes/search${queryString ? `?${queryString}` : ''}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch book boxes');
+    }
+
+    return data;
   }
+
 };
 
 
@@ -228,35 +320,43 @@ export const qrCodeAPI = {
     return data;
   },
 
-  // Create a custom QR code with uploaded image as logo
-  createCustomQR: async ({ data, logoFilename, size = 300, config = {}, fileFormat = 'png' }) => {
-    if (!data) {
-      throw new Error('QR code data is required');
+  // Create a custom QR code with public/icon.png as logo
+  createQR: async (data) => {
+    if (!data || typeof data !== 'string') {
+      throw new Error('QR code data is required and must be a string');
+    }
+
+    // First, we need to upload the icon.png file to get a logoFilename
+    let logoFilename = '';
+    try {
+      // Fetch the icon.png file from public directory
+      const iconResponse = await fetch('/icon.png');
+      if (iconResponse.ok) {
+        const iconBlob = await iconResponse.blob();
+        const iconFile = new File([iconBlob], 'icon.png', { type: 'image/png' });
+        const uploadResult = await qrCodeAPI.uploadImage(iconFile);
+        logoFilename = uploadResult.file || '';
+      }
+    } catch (error) {
+      console.warn('Failed to upload logo, creating QR code without logo:', error);
     }
 
     // Default config with uploaded logo
     const defaultConfig = {
-      body: 'square',
-      eye: 'frame0',
-      eyeBall: 'ball0',
+      body: 'circle',
+      eye: 'frame13',
+      eyeBall: 'ball15',
       bodyColor: '#000000',
       bgColor: '#ffffff',
-      eye1Color: '#000000',
-      eye2Color: '#000000',
-      eye3Color: '#000000',
-      eyeBall1Color: '#000000',
-      eyeBall2Color: '#000000',
-      eyeBall3Color: '#000000',
-      logo: logoFilename || '',
+      logo: logoFilename,
       logoMode: 'default',
-      ...config
     };
 
     const requestBody = {
       data: data,
       config: defaultConfig,
-      size: size,
-      file: fileFormat,
+      size: 2000,
+      file: 'png',
       download: false
     };
 
@@ -278,7 +378,7 @@ export const qrCodeAPI = {
     // Return the response as a blob for image data
     return await response.blob();
   },
-  
+
 
   // Helper function to convert blob to data URL for display
   blobToDataURL: (blob) => {

@@ -3,6 +3,7 @@ import { tokenService } from './services/api'
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import RegisterBookBox from './components/RegisterBookBox'
+import ManageBookBoxes from './components/ManageBookBoxes'
 import LookupTransactions from './components/LookupTransactions'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -32,6 +33,14 @@ function App() {
           element={
             <ProtectedRoute>
               <RegisterBookBox />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/manage-book-boxes" 
+          element={
+            <ProtectedRoute>
+              <ManageBookBoxes />
             </ProtectedRoute>
           } 
         />

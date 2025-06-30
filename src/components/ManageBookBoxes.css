@@ -1,0 +1,342 @@
+/* Search Form Styles */
+.search-form {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-section h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.search-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.search-row .form-group {
+  margin-bottom: 0;
+}
+
+.search-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  height: 40px;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.search-button:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.search-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.location-warning {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  color: #856404;
+  font-size: 14px;
+}
+
+/* Results Section */
+.results-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.results-section h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.bookbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.bookbox-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.bookbox-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #007bff;
+}
+
+.bookbox-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: #f8f9fa;
+}
+
+.bookbox-info {
+  padding: 16px;
+}
+
+.bookbox-info h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.bookbox-description {
+  margin: 0 0 12px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bookbox-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #888;
+}
+
+.bookbox-meta span {
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Update Form Styles */
+.qr-button {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 12px;
+  transition: background-color 0.2s;
+  min-width: 160px;
+}
+
+.qr-button:hover:not(:disabled) {
+  background: #138496;
+}
+
+.qr-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.delete-button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 12px;
+  transition: background-color 0.2s;
+}
+
+.delete-button:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.delete-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.close-qr-button {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 160px;
+}
+
+.close-qr-button:hover {
+  background: #5a6268;
+}
+
+/* QR Code Section Styles (reuse from RegisterBookBox) */
+.qr-code-section {
+  max-width: 800px;
+  margin: 20px auto 0;
+  padding: 20px;
+}
+
+.qr-instructions {
+  margin: 0 0 20px 0;
+  color: #555;
+  text-align: center;
+  font-size: 14px;
+}
+
+.qr-code-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.qr-code-image {
+  max-width: 300px;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.qr-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.download-button {
+  background: #28a745;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  min-width: 160px;
+}
+
+.download-button:hover {
+  background: #218838;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .search-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .search-row .form-group {
+    margin-bottom: 12px;
+  }
+  
+  .search-button {
+    width: 100%;
+    margin-top: 8px;
+  }
+  
+  .bookbox-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bookbox-meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .header-actions button {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  
+  .qr-code-section {
+    padding: 10px;
+  }
+  
+  .qr-code-image {
+    max-width: 250px;
+    max-height: 250px;
+  }
+  
+  .qr-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .download-button,
+  .close-qr-button,
+  .qr-button {
+    width: 100%;
+    max-width: 300px;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-form,
+  .results-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .bookbox-info {
+    padding: 12px;
+  }
+  
+  .bookbox-image {
+    height: 150px;
+  }
+}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wrapper } from '@googlemaps/react-wrapper'
-import { tokenService, bookboxesAPI } from '../services/api'
+import { tokenService, bookboxesAPI, qrCodeAPI } from '../services/api'
 import logo from '../assets/logo.png'
 import './SubPage.css'
 import './RegisterBookBox.css'
@@ -18,6 +18,10 @@ function RegisterBookBox() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [shouldCenterMap, setShouldCenterMap] = useState(false)
+  const [qrCodeData, setQrCodeData] = useState(null)
+  const [qrCodeUrl, setQrCodeUrl] = useState(null)
+  const [createdBookBoxName, setCreatedBookBoxName] = useState('')
+  const [showQrCode, setShowQrCode] = useState(false)
   const mapRef = useRef(null)
   const markerRef = useRef(null)
 
@@ -46,6 +50,21 @@ function RegisterBookBox() {
   }
 
   const handleBackToDashboard = () => {
+    navigate('/dashboard')
+  }
+
+  const handleDownloadQR = () => {
+    if (qrCodeData && createdBookBoxName) {
+      const filename = `${createdBookBoxName.replace(/[^a-zA-Z0-9]/g, '_')}_QR_code.png`
+      qrCodeAPI.downloadBlob(qrCodeData, filename)
+    }
+  }
+
+  const handleContinueToDashboard = () => {
+    setShowQrCode(false)
+    setQrCodeData(null)
+    setQrCodeUrl(null)
+    setCreatedBookBoxName('')
     navigate('/dashboard')
   }
 
@@ -115,13 +134,20 @@ function RegisterBookBox() {
       const response = await bookboxesAPI.createBookBox(bookBoxData)
       console.log('Book box created successfully:', response)
 
+      // Generate QR code with the book box ID
+      const qrBlob = await qrCodeAPI.createQR(response._id.toString())
+      const qrUrl = await qrCodeAPI.blobToDataURL(qrBlob)
+      
+      // Store QR code data and show QR section
+      setQrCodeData(qrBlob)
+      setQrCodeUrl(qrUrl)
+      setCreatedBookBoxName(formData.title)
+      setShowQrCode(true)
+
       // Reset form
       setFormData({ title: '', infoText: '' })
       setSelectedImage(null)
       setImagePreview(null)
-      
-      // Navigate back to dashboard or show success message
-      navigate('/dashboard')
 
     } catch (err) {
       setError(err.message)
@@ -302,6 +328,32 @@ function RegisterBookBox() {
               </button>
             </div>
           </form>
+
+          {/* QR Code Section */}
+          {showQrCode && qrCodeUrl && (
+            <div className="qr-code-section">
+              <div className="success-message">
+                ✅ Book box "{createdBookBoxName}" created successfully!
+              </div>
+              <div className="form-section">
+                <h3>QR Code Generated</h3>
+                <p className="qr-instructions">
+                  Your QR code has been generated. Download it and print it to place on your book box.
+                </p>
+                <div className="qr-code-container">
+                  <img src={qrCodeUrl} alt="QR Code" className="qr-code-image" />
+                </div>
+                <div className="qr-actions">
+                  <button onClick={handleDownloadQR} className="download-button">
+                    📥 Download QR Code
+                  </button>
+                  <button onClick={handleContinueToDashboard} className="continue-button">
+                    Continue to Dashboard
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
