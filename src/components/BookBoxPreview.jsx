@@ -50,7 +50,7 @@ function BookBoxPreview({ bookboxId, onClose }) {
     return null
   }
 
-  const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${bookBox.latitude},${bookBox.longitude}&zoom=15&size=300x150&markers=color:red%7C${bookBox.latitude},${bookBox.longitude}&key=${import.meta.env.VITE_GMAPS_API_KEY || 'AIzaSyD2S0FbkhCA-w5ACASmelGH1jCoi7UcoYE'}`
+  const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${bookBox.latitude},${bookBox.longitude}&zoom=15&size=300x150&markers=color:red%7C${bookBox.latitude},${bookBox.longitude}&key=${import.meta.env.VITE_GMAPS_API_KEY}`
 
   return (
     <div className="bookbox-preview">
