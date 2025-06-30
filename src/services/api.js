@@ -1,4 +1,5 @@
-const API_BASE_URL = 'https://lino-1.onrender.com';
+// const API_BASE_URL = 'https://lino-1.onrender.com';
+const API_BASE_URL = 'http://localhost:3000'; // For local development, change to your local server URL
 
 
 export const tokenService = {
@@ -76,4 +77,59 @@ export const transactionsAPI = {
 
     return data;
   },
+};
+
+export const bookboxesAPI = {
+  createBookBox: async ({ name, image, longitude, latitude, infoText }) => {
+    const token = tokenService.getToken();
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('image', image);
+    formData.append('longitude', longitude);
+    formData.append('latitude', latitude);
+    formData.append('infoText', infoText);
+
+    const response = await fetch(`${API_BASE_URL}/bookboxes/new`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create book box');
+    }
+
+    return data;
+  },
+
+  getBookBox: async (id) => {
+    const token = tokenService.getToken();
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/bookboxes/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch book box');
+    }
+
+    return data;
+  }
 };

@@ -1,6 +1,11 @@
+import { useState } from 'react'
+import { format } from 'timeago.js'
+import BookBoxPreview from './BookBoxPreview'
 import './TransactionCard.css'
 
 function TransactionCard({ transaction }) {
+  const [showPreview, setShowPreview] = useState(false)
+  const [previewTimeout, setPreviewTimeout] = useState(null)
   const formatDate = (timestamp) => {
     const date = new Date(timestamp)
     return date.toLocaleString('en-US', {
@@ -12,41 +17,73 @@ function TransactionCard({ transaction }) {
     })
   }
 
-  const getActionIcon = (action) => {
-    return action === 'added' ? '📚' : '📖'
+  const getActionText = (action) => {
+    return action === 'added' ? 'added' : 'took'
+  }
+
+  const getPreposition = (action) => {
+    return action === 'added' ? 'to' : 'from'
   }
 
   const getActionColor = (action) => {
     return action === 'added' ? '#10b981' : '#f59e0b'
   }
 
+  const getActionIcon = (action) => {
+    return action === 'added' ? '📚' : '📖'
+  }
+
+  const handleBookBoxHover = () => {
+    if (previewTimeout) {
+      clearTimeout(previewTimeout)
+    }
+    const timeout = setTimeout(() => {
+      setShowPreview(true)
+    }, 500) // 500ms delay before showing preview
+    setPreviewTimeout(timeout)
+  }
+
+  const handleBookBoxLeave = () => {
+    if (previewTimeout) {
+      clearTimeout(previewTimeout)
+      setPreviewTimeout(null)
+    }
+    setShowPreview(false)
+  }
+
   return (
     <div className="transaction-card">
-      <div className="transaction-header">
-        <div className="transaction-action">
-          <span className="action-icon">{getActionIcon(transaction.action)}</span>
-          <span 
-            className="action-text"
-            style={{ color: getActionColor(transaction.action) }}
-          >
-            {transaction.action === 'added' ? 'Book Added' : 'Book Taken'}
+      <div className="transaction-content">
+        <div className="transaction-icon">
+          {getActionIcon(transaction.action)}
+        </div>
+        <div className="transaction-text">
+          <span className="transaction-description">
+            <strong>{transaction.username}</strong>{' '}
+            <span 
+              className="action-word"
+              style={{ color: getActionColor(transaction.action) }}
+            >
+              {getActionText(transaction.action)}
+            </span>{' '}
+            the book <strong>"{transaction.bookTitle}"</strong>{' '}
+            {getPreposition(transaction.action)} book box{' '}
+            <span 
+              className="bookbox-id-hover"
+              onMouseEnter={handleBookBoxHover}
+              onMouseLeave={handleBookBoxLeave}
+            >
+              <strong>{transaction.bookboxId}</strong>
+              {showPreview && (
+                <BookBoxPreview 
+                  bookboxId={transaction.bookboxId}
+                  onClose={() => setShowPreview(false)}
+                />
+              )}
+            </span>
           </span>
-        </div>
-        <div className="transaction-date">
-          {formatDate(transaction.timestamp)}
-        </div>
-      </div>
-      
-      <div className="transaction-body">
-        <h3 className="book-title">{transaction.bookTitle}</h3>
-        <div className="transaction-details">
-          <div className="detail-item">
-            <span className="detail-label">User:</span>
-            <span className="detail-value">{transaction.username}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Book Box ID:</span>
-            <span className="detail-value">{transaction.bookboxId}</span>
+          <div className="transaction-time">
+            {formatDate(transaction.timestamp)} ({format(transaction.timestamp)})
           </div>
         </div>
       </div>
