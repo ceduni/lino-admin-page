@@ -86,28 +86,56 @@ export const bookboxesAPI = {
       throw new Error('No authentication token found');
     }
 
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('image', image);
-    formData.append('longitude', longitude);
-    formData.append('latitude', latitude);
-    formData.append('infoText', infoText);
+    // If image is a URL string (from ImgBB), send as JSON
+    // If image is a File object, send as FormData
+    if (typeof image === 'string') {
+      const response = await fetch(`${API_BASE_URL}/bookboxes/new`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          image,
+          longitude,
+          latitude,
+          infoText
+        }),
+      });
 
-    const response = await fetch(`${API_BASE_URL}/bookboxes/new`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      body: formData,
-    });
+      const data = await response.json();
 
-    const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create book box');
+      }
 
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to create book box');
+      return data;
+    } else {
+      // Handle File object with FormData
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('image', image);
+      formData.append('longitude', longitude);
+      formData.append('latitude', latitude);
+      formData.append('infoText', infoText);
+
+      const response = await fetch(`${API_BASE_URL}/bookboxes/new`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create book box');
+      }
+
+      return data;
     }
-
-    return data;
   },
 
   getBookBox: async (id) => {
@@ -131,5 +159,146 @@ export const bookboxesAPI = {
     }
 
     return data;
+  },
+
+  deleteBookBox: async (id) => {
+    const token = tokenService.getToken();
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/bookboxes/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to delete book box');
+    }
+
+    return { message: 'Book box deleted successfully' };
+  }
+};
+
+
+export const qrCodeAPI = {
+  api_url: 'https://qrcode-monkey.p.rapidapi.com',
+  api_key: import.meta.env.VITE_QR_CODE_API_KEY,
+
+  // Upload an image to use as a logo in QR codes
+  uploadImage: async (imageFile) => {
+    if (!imageFile) {
+      throw new Error('Image file is required');
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml'];
+    if (!allowedTypes.includes(imageFile.type)) {
+      throw new Error('Only PNG, JPG, and SVG files are allowed');
+    }
+
+    // Validate file size (2MB max as per API docs)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    if (imageFile.size > maxSize) {
+      throw new Error('File size must be less than 2MB');
+    }
+
+    const formData = new FormData();
+    formData.append('file', imageFile);
+
+    const response = await fetch(`${qrCodeAPI.api_url}/qr/uploadImage`, {
+      method: 'POST',
+      headers: {
+        'X-RapidAPI-Key': qrCodeAPI.api_key,
+        'X-RapidAPI-Host': 'qrcode-monkey.p.rapidapi.com',
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to upload image');
+    }
+
+    return data;
+  },
+
+  // Create a custom QR code with uploaded image as logo
+  createCustomQR: async ({ data, logoFilename, size = 300, config = {}, fileFormat = 'png' }) => {
+    if (!data) {
+      throw new Error('QR code data is required');
+    }
+
+    // Default config with uploaded logo
+    const defaultConfig = {
+      body: 'square',
+      eye: 'frame0',
+      eyeBall: 'ball0',
+      bodyColor: '#000000',
+      bgColor: '#ffffff',
+      eye1Color: '#000000',
+      eye2Color: '#000000',
+      eye3Color: '#000000',
+      eyeBall1Color: '#000000',
+      eyeBall2Color: '#000000',
+      eyeBall3Color: '#000000',
+      logo: logoFilename || '',
+      logoMode: 'default',
+      ...config
+    };
+
+    const requestBody = {
+      data: data,
+      config: defaultConfig,
+      size: size,
+      file: fileFormat,
+      download: false
+    };
+
+    const response = await fetch(`${qrCodeAPI.api_url}/qr/custom`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-RapidAPI-Key': qrCodeAPI.api_key,
+        'X-RapidAPI-Host': 'qrcode-monkey.p.rapidapi.com',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to create QR code: ${errorText}`);
+    }
+
+    // Return the response as a blob for image data
+    return await response.blob();
+  },
+  
+
+  // Helper function to convert blob to data URL for display
+  blobToDataURL: (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  },
+
+  // Helper function to download blob as file
+  downloadBlob: (blob, filename) => { 
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 };
