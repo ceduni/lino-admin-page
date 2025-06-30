@@ -6,6 +6,69 @@ function BookBoxPreview({ bookboxId, onClose }) {
   const [bookBox, setBookBox] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [userLocation, setUserLocation] = useState(null)
+  const [distance, setDistance] = useState(null)
+
+  // Function to calculate distance between two coordinates using Haversine formula
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371 // Radius of the Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLon = (lon2 - lon1) * Math.PI / 180
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    const distance = R * c // Distance in kilometers
+    return distance
+  }
+
+  // Function to format distance for display
+  const formatDistance = (distanceKm) => {
+    if (distanceKm < 1) {
+      return `${Math.round(distanceKm * 1000)}m away`
+    } else if (distanceKm < 10) {
+      return `${distanceKm.toFixed(1)}km away`
+    } else {
+      return `${Math.round(distanceKm)}km away`
+    }
+  }
+
+  // Get user location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          })
+        },
+        (error) => {
+          // Silently fail - don't show distance if location permission denied
+          console.log('Location permission denied or unavailable')
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 300000 // 5 minutes
+        }
+      )
+    }
+  }, [])
+
+  // Calculate distance when both locations are available
+  useEffect(() => {
+    if (userLocation && bookBox) {
+      const dist = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        bookBox.latitude,
+        bookBox.longitude
+      )
+      setDistance(dist)
+    }
+  }, [userLocation, bookBox])
 
   useEffect(() => {
     const fetchBookBox = async () => {
@@ -56,7 +119,11 @@ function BookBoxPreview({ bookboxId, onClose }) {
     <div className="bookbox-preview">
       <div className="preview-header">
         <h3 className="preview-title">{bookBox.name}</h3>
-        <span className="preview-id">ID: {bookBox.id}</span>
+        {distance !== null && (
+          <span className="preview-distance">
+            📍 {formatDistance(distance)}
+          </span>
+        )}
       </div>
       
       <div className="preview-content">

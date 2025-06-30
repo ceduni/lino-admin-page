@@ -42,13 +42,14 @@
   flex: 1;
 }
 
-.preview-id {
+.preview-distance {
   font-size: 0.75rem;
-  color: #64748b;
-  background: #f1f5f9;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
 }
 
