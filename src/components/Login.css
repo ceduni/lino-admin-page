@@ -1,0 +1,142 @@
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #6B9EE0; /* #558ED5 but a bit whiter */
+  padding: 20px;
+}
+
+.login-form {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.logo {
+  width: 120px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-family: 'Permanent Marker', cursive;
+  color: #1E497C;
+  font-size: 2.2em;
+  margin-bottom: 30px;
+  line-height: 1.2;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input {
+  padding-right: 50px;
+}
+
+.password-toggle-button {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.password-toggle-button:focus {
+  outline: 2px solid #558ED5;
+  outline-offset: 2px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #558ED5;
+  box-shadow: 0 0 0 3px rgba(85, 142, 213, 0.1);
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+}
+
+.login-button {
+  width: 100%;
+  padding: 15px;
+  background-color: #1E497C;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.login-button:hover:not(:disabled) {
+  background-color: #163a63;
+}
+
+.login-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .login-form {
+    padding: 30px 20px;
+    margin: 10px;
+  }
+  
+  .title {
+    font-size: 1.8em;
+  }
+  
+  .logo {
+    width: 100px;
+  }
+}

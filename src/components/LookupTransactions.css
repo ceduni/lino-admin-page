@@ -1,0 +1,249 @@
+.search-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 2rem;
+}
+
+.search-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-input {
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #558ED5;
+  box-shadow: 0 0 0 3px rgba(85, 142, 213, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.search-button {
+  background-color: #558ED5;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.search-button:hover:not(:disabled) {
+  background-color: #4a7bc8;
+}
+
+.search-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.clear-button {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.clear-button:hover {
+  background-color: #4b5563;
+}
+
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.results-section {
+  margin-top: 2rem;
+}
+
+.loading-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #558ED5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-message p {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.results-header {
+  margin-bottom: 1.5rem;
+}
+
+.results-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: center;
+  margin: 0;
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.no-results-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-results-text {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin: 0;
+  max-width: 400px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .search-section {
+    padding: 1.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-button,
+  .clear-button {
+    width: 100%;
+  }
+  
+  .search-title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-section {
+    padding: 1rem;
+  }
+  
+  .search-form {
+    gap: 1rem;
+  }
+  
+  .form-input {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+  }
+  
+  .search-button,
+  .clear-button {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .loading-message,
+  .no-results {
+    padding: 2rem 1rem;
+  }
+  
+  .no-results-icon {
+    font-size: 2.5rem;
+  }
+  
+  .no-results-text {
+    font-size: 1rem;
+  }
+}

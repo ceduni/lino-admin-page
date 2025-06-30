@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.dashboard-header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-logo {
+  width: 50px;
+  height: auto;
+}
+
+.dashboard-title {
+  font-family: 'Permanent Marker', cursive;
+  color: #1E497C;
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.logout-button {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #b91c1c;
+}
+
+.dashboard-main {
+  padding: 3rem 0;
+}
+
+.dashboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  text-align: center;
+}
+
+.welcome-title {
+  font-size: 2.5rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.welcome-subtitle {
+  font-size: 1.2rem;
+  color: #64748b;
+  margin-bottom: 3rem;
+}
+
+.action-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.action-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #558ED5;
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.card-description {
+  color: #64748b;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.card-button {
+  background-color: #558ED5;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.card-button:hover {
+  background-color: #4a7bc8;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 1rem;
+  }
+  
+  .dashboard-title {
+    font-size: 1.4rem;
+  }
+  
+  .dashboard-content {
+    padding: 0 1rem;
+  }
+  
+  .welcome-title {
+    font-size: 2rem;
+  }
+  
+  .action-cards {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .action-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-left {
+    gap: 0.5rem;
+  }
+  
+  .dashboard-title {
+    font-size: 1.2rem;
+  }
+  
+  .logout-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .welcome-title {
+    font-size: 1.8rem;
+  }
+  
+  .welcome-subtitle {
+    font-size: 1rem;
+  }
+}
