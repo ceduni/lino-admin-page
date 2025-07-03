@@ -1,14 +1,15 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { tokenService } from './services/api'
 import Login from './components/Login'
-import Dashboard from './components/Dashboard'
+import MainPage from './components/MainPage'
+import BookBoxDetail from './components/BookBoxDetail'
 import RegisterBookBox from './components/RegisterBookBox'
-import ManageBookBoxes from './components/ManageBookBoxes'
+import ManageBookBoxUpdate from './components/ManageBookBoxUpdate'
 import LookupTransactions from './components/LookupTransactions'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
-  // If user is already authenticated, redirect to dashboard
+  // If user is already authenticated, redirect to main page
   const isAuthenticated = tokenService.isAuthenticated()
 
   return (
@@ -17,19 +18,27 @@ function App() {
         <Route 
           path="/" 
           element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
+            isAuthenticated ? <Navigate to="/main" replace /> : <Login />
           } 
         />
         <Route 
-          path="/dashboard" 
+          path="/main" 
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <MainPage />
             </ProtectedRoute>
           } 
         />
         <Route 
-          path="/dashboard/register-book-box" 
+          path="/book-box/:id" 
+          element={
+            <ProtectedRoute>
+              <BookBoxDetail />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/register-book-box" 
           element={
             <ProtectedRoute>
               <RegisterBookBox />
@@ -37,15 +46,15 @@ function App() {
           } 
         />
         <Route 
-          path="/dashboard/manage-book-boxes" 
+          path="/manage-book-boxes/:id" 
           element={
             <ProtectedRoute>
-              <ManageBookBoxes />
+              <ManageBookBoxUpdate />
             </ProtectedRoute>
           } 
         />
         <Route 
-          path="/dashboard/lookup-transactions" 
+          path="/lookup-transactions" 
           element={
             <ProtectedRoute>
               <LookupTransactions />

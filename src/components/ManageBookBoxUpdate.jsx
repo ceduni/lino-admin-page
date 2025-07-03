@@ -1,48 +1,66 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Wrapper } from '@googlemaps/react-wrapper'
 import { tokenService, bookboxesAPI, qrCodeAPI } from '../services/api'
 import logo from '../assets/logo.png'
 import './SubPage.css'
-import './RegisterBookBox.css'
+import './ManageBookBoxes.css'
 
-function RegisterBookBox() {
+function ManageBookBoxUpdate() {
+  const { id } = useParams()
   const navigate = useNavigate()
-  const [formData, setFormData] = useState({
-    title: '',
+  const [selectedBookBox, setSelectedBookBox] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [error, setError] = useState('')
+
+  // Update form states
+  const [updateFormData, setUpdateFormData] = useState({
+    name: '',
     infoText: ''
   })
   const [selectedImage, setSelectedImage] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
-  const [location, setLocation] = useState({ lat: 43.6532, lng: -79.3832 }) // Default to Toronto
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [location, setLocation] = useState({ lat: 43.6532, lng: -79.3832 })
   const [shouldCenterMap, setShouldCenterMap] = useState(false)
   const [qrCodeData, setQrCodeData] = useState(null)
   const [qrCodeUrl, setQrCodeUrl] = useState(null)
-  const [createdBookBoxName, setCreatedBookBoxName] = useState('')
   const [showQrCode, setShowQrCode] = useState(false)
+  const [isGeneratingQr, setIsGeneratingQr] = useState(false)
   const mapRef = useRef(null)
   const markerRef = useRef(null)
 
   useEffect(() => {
-    // Get user's current location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          })
-          setShouldCenterMap(true) // Only center map for initial geolocation
-        },
-        (error) => {
-          console.warn('Could not get user location:', error)
-          // Keep default location (Toronto)
-        }
-      )
+    const fetchBookBox = async () => {
+      try {
+        setIsLoading(true)
+        const fullBookBoxData = await bookboxesAPI.getBookBox(id)
+        setSelectedBookBox(fullBookBoxData)
+        
+        // Prefill the update form
+        setUpdateFormData({
+          name: fullBookBoxData.name || '',
+          infoText: fullBookBoxData.infoText || ''
+        })
+        setLocation({
+          lat: fullBookBoxData.latitude || 43.6532,
+          lng: fullBookBoxData.longitude || -79.3832
+        })
+        setImagePreview(fullBookBoxData.image || null)
+        setSelectedImage(null)
+        setShouldCenterMap(true)
+      } catch (err) {
+        setError(err.message)
+        console.error('Error fetching book box details:', err)
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [])
+
+    if (id) {
+      fetchBookBox()
+    }
+  }, [id])
 
   const handleLogout = () => {
     tokenService.removeToken()
@@ -53,24 +71,13 @@ function RegisterBookBox() {
     navigate('/main')
   }
 
-  const handleDownloadQR = () => {
-    if (qrCodeData && createdBookBoxName) {
-      const filename = `${createdBookBoxName.replace(/[^a-zA-Z0-9]/g, '_')}_QR_code.png`
-      qrCodeAPI.downloadBlob(qrCodeData, filename)
-    }
+  const handleBackToDetail = () => {
+    navigate(`/book-box/${id}`)
   }
 
-  const handleContinueToMain = () => {
-    setShowQrCode(false)
-    setQrCodeData(null)
-    setQrCodeUrl(null)
-    setCreatedBookBoxName('')
-    navigate('/main')
-  }
-
-  const handleInputChange = (e) => {
+  const handleUpdateInputChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
+    setUpdateFormData(prev => ({
       ...prev,
       [name]: value
     }))
@@ -105,62 +112,102 @@ function RegisterBookBox() {
     return data.data.url
   }
 
-  const handleSubmit = async (e) => {
+  const handleUpdateSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    setIsLoading(true)
+    setIsUpdating(true)
 
     try {
-      if (!formData.title.trim()) {
-        throw new Error('Title is required')
+      if (!updateFormData.name.trim()) {
+        throw new Error('Name is required')
       }
 
-      if (!selectedImage) {
-        throw new Error('Please select an image')
+      let imageUrl = imagePreview
+      
+      // Upload new image if selected
+      if (selectedImage) {
+        imageUrl = await uploadImageToImgBB(selectedImage)
       }
 
-      // Upload image to ImgBB
-      const imageUrl = await uploadImageToImgBB(selectedImage)
-
-      // Create book box
-      const bookBoxData = {
-        name: formData.title,
+      const updateData = {
+        name: updateFormData.name,
         image: imageUrl,
         longitude: location.lng,
         latitude: location.lat,
-        infoText: formData.infoText || ''
+        infoText: updateFormData.infoText || ''
       }
 
-      const response = await bookboxesAPI.createBookBox(bookBoxData)
-      console.log('Book box created successfully:', response)
+      await bookboxesAPI.updateBookBox(selectedBookBox.id, updateData)
+      
+      // Navigate back to book box detail page
+      navigate(`/book-box/${id}`)
 
+    } catch (err) {
+      setError(err.message)
+      console.error('Error updating book box:', err)
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleDeleteBookBox = async () => {
+    if (!selectedBookBox || !window.confirm('Are you sure you want to delete this book box?')) {
+      return
+    }
+
+    try {
+      setIsUpdating(true)
+      await bookboxesAPI.deleteBookBox(selectedBookBox.id)
+      
+      // Navigate back to main page after deletion
+      navigate('/main')
+    } catch (err) {
+      setError(err.message)
+      console.error('Error deleting book box:', err)
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleGenerateQR = async () => {
+    if (!selectedBookBox) return
+
+    setError('')
+    setIsGeneratingQr(true)
+
+    try {
       // Generate QR code with the book box ID
-      const qrBlob = await qrCodeAPI.createQR(response._id.toString())
+      const qrBlob = await qrCodeAPI.createQR(selectedBookBox.id.toString())
       const qrUrl = await qrCodeAPI.blobToDataURL(qrBlob)
       
       // Store QR code data and show QR section
       setQrCodeData(qrBlob)
       setQrCodeUrl(qrUrl)
-      setCreatedBookBoxName(formData.title)
       setShowQrCode(true)
-
-      // Reset form
-      setFormData({ title: '', infoText: '' })
-      setSelectedImage(null)
-      setImagePreview(null)
-
     } catch (err) {
       setError(err.message)
-      console.error('Error creating book box:', err)
+      console.error('Error generating QR code:', err)
     } finally {
-      setIsLoading(false)
+      setIsGeneratingQr(false)
     }
+  }
+
+  const handleDownloadQR = () => {
+    if (qrCodeData && selectedBookBox) {
+      const filename = `${selectedBookBox.name.replace(/[^a-zA-Z0-9]/g, '_')}_QR_code.png`
+      qrCodeAPI.downloadBlob(qrCodeData, filename)
+    }
+  }
+
+  const handleCloseQR = () => {
+    setShowQrCode(false)
+    setQrCodeData(null)
+    setQrCodeUrl(null)
   }
 
   const initMap = (map) => {
     mapRef.current = map
     
-    // Create marker
     const marker = new window.google.maps.Marker({
       position: location,
       map: map,
@@ -170,7 +217,6 @@ function RegisterBookBox() {
     
     markerRef.current = marker
 
-    // Update location when marker is dragged
     marker.addListener('dragend', () => {
       const position = marker.getPosition()
       setLocation({
@@ -179,7 +225,6 @@ function RegisterBookBox() {
       })
     })
 
-    // Update location when map is clicked
     map.addListener('click', (e) => {
       const newLocation = {
         lat: e.latLng.lat(),
@@ -207,21 +252,80 @@ function RegisterBookBox() {
       }
     }, [])
 
-    // Separate effect to handle location changes
     useEffect(() => {
       if (mapRef.current && markerRef.current) {
-        // Update marker position
         markerRef.current.setPosition(location)
         
-        // Only re-center map if this is from initial geolocation
         if (shouldCenterMap) {
           mapRef.current.setCenter(location)
-          setShouldCenterMap(false) // Reset flag after centering
+          setShouldCenterMap(false)
         }
       }
     }, [location, shouldCenterMap])
 
     return <div ref={localMapRef} className="map-container" />
+  }
+
+  if (isLoading) {
+    return (
+      <div className="subpage-container">
+        <header className="subpage-header">
+          <div className="header-content">
+            <div className="header-left">
+              <img src={logo} alt="Lino Logo" className="header-logo" />
+              <h1 className="subpage-title">Loading...</h1>
+            </div>
+            <div className="header-actions">
+              <button onClick={handleBackToMain} className="back-button">
+                ← Back to Main
+              </button>
+              <button onClick={handleLogout} className="logout-button">
+                Logout
+              </button>
+            </div>
+          </div>
+        </header>
+        <main className="subpage-main">
+          <div className="subpage-content">
+            <div className="loading-section">
+              <p>Loading book box details...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (error && !selectedBookBox) {
+    return (
+      <div className="subpage-container">
+        <header className="subpage-header">
+          <div className="header-content">
+            <div className="header-left">
+              <img src={logo} alt="Lino Logo" className="header-logo" />
+              <h1 className="subpage-title">Error</h1>
+            </div>
+            <div className="header-actions">
+              <button onClick={handleBackToMain} className="back-button">
+                ← Back to Main
+              </button>
+              <button onClick={handleLogout} className="logout-button">
+                Logout
+              </button>
+            </div>
+          </div>
+        </header>
+        <main className="subpage-main">
+          <div className="subpage-content">
+            <div className="error-message">{error}</div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (!selectedBookBox) {
+    return null
   }
 
   return (
@@ -230,11 +334,14 @@ function RegisterBookBox() {
         <div className="header-content">
           <div className="header-left">
             <img src={logo} alt="Lino Logo" className="header-logo" />
-            <h1 className="subpage-title">Register New Book Box</h1>
+            <h1 className="subpage-title">Update Book Box</h1>
           </div>
           <div className="header-actions">
+            <button onClick={handleBackToDetail} className="back-button">
+              ← Back to Details
+            </button>
             <button onClick={handleBackToMain} className="back-button">
-              ← Back to Main
+              ← Main
             </button>
             <button onClick={handleLogout} className="logout-button">
               Logout
@@ -245,21 +352,20 @@ function RegisterBookBox() {
 
       <main className="subpage-main">
         <div className="subpage-content">
-          <form onSubmit={handleSubmit} className="register-form">
+          <form onSubmit={handleUpdateSubmit} className="register-form">
             {error && <div className="error-message">{error}</div>}
             
-            {/* Title and Info Text Section */}
             <div className="form-section">
               <h3>Book Box Information</h3>
               <div className="form-group">
-                <label htmlFor="title">Title *</label>
+                <label htmlFor="name">Name *</label>
                 <input
                   type="text"
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="Enter book box title"
+                  id="name"
+                  name="name"
+                  value={updateFormData.name}
+                  onChange={handleUpdateInputChange}
+                  placeholder="Enter book box name"
                   required
                 />
               </div>
@@ -268,15 +374,14 @@ function RegisterBookBox() {
                 <textarea
                   id="infoText"
                   name="infoText"
-                  value={formData.infoText}
-                  onChange={handleInputChange}
+                  value={updateFormData.infoText}
+                  onChange={handleUpdateInputChange}
                   placeholder="Enter additional information about this book box"
                   rows="3"
                 />
               </div>
             </div>
 
-            {/* Image Upload Section */}
             <div className="form-section">
               <h3>Book Box Image</h3>
               <div className="image-upload-container">
@@ -301,7 +406,6 @@ function RegisterBookBox() {
               </div>
             </div>
 
-            {/* Map Section */}
             <div className="form-section">
               <h3>Location</h3>
               <p className="location-info">
@@ -317,14 +421,29 @@ function RegisterBookBox() {
               </div>
             </div>
 
-            {/* Submit Button */}
             <div className="form-actions">
               <button 
                 type="submit" 
                 className="submit-button"
-                disabled={isLoading}
+                disabled={isUpdating}
               >
-                {isLoading ? 'Creating Book Box...' : 'Create Book Box'}
+                {isUpdating ? 'Updating Book Box...' : 'Update Book Box'}
+              </button>
+              <button 
+                type="button" 
+                onClick={handleGenerateQR}
+                className="qr-button"
+                disabled={isGeneratingQr}
+              >
+                {isGeneratingQr ? 'Generating QR...' : '📱 Generate QR Code'}
+              </button>
+              <button 
+                type="button" 
+                onClick={handleDeleteBookBox}
+                className="delete-button"
+                disabled={isUpdating}
+              >
+                Delete Book Box
               </button>
             </div>
           </form>
@@ -332,11 +451,8 @@ function RegisterBookBox() {
           {/* QR Code Section */}
           {showQrCode && qrCodeUrl && (
             <div className="qr-code-section">
-              <div className="success-message">
-                ✅ Book box "{createdBookBoxName}" created successfully!
-              </div>
               <div className="form-section">
-                <h3>QR Code Generated</h3>
+                <h3>QR Code for "{selectedBookBox.name}"</h3>
                 <p className="qr-instructions">
                   Your QR code has been generated. Download it and print it to place on your book box.
                 </p>
@@ -347,8 +463,8 @@ function RegisterBookBox() {
                   <button onClick={handleDownloadQR} className="download-button">
                     📥 Download QR Code
                   </button>
-                  <button onClick={handleContinueToMain} className="continue-button">
-                    Continue to Main
+                  <button onClick={handleCloseQR} className="close-qr-button">
+                    Close
                   </button>
                 </div>
               </div>
@@ -360,5 +476,4 @@ function RegisterBookBox() {
   )
 }
 
-
-export default RegisterBookBox
+export default ManageBookBoxUpdate

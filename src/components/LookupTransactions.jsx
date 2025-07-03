@@ -24,8 +24,8 @@ function LookupTransactions() {
     navigate('/')
   }
 
-  const handleBackToDashboard = () => {
-    navigate('/dashboard')
+  const handleBackToMain = () => {
+    navigate('/main')
   }
 
   const handleInputChange = (e) => {
@@ -100,8 +100,8 @@ function LookupTransactions() {
             <h1 className="subpage-title">Lookup Book Transactions</h1>
           </div>
           <div className="header-actions">
-            <button onClick={handleBackToDashboard} className="back-button">
-              ← Back to Dashboard
+            <button onClick={handleBackToMain} className="back-button">
+              ← Back to Main
             </button>
             <button onClick={handleLogout} className="logout-button">
               Logout

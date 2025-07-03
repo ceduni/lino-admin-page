@@ -1,0 +1,178 @@
+.transaction-graphs {
+  width: 100%;
+}
+
+.chart-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.chart-header h4 {
+  color: #2c3e50;
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.time-period-selector,
+.date-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.time-period-selector label,
+.date-selector label {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9rem;
+}
+
+.time-period-selector select,
+.date-selector input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.time-period-selector select:focus,
+.date-selector input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.chart-container {
+  width: 100%;
+  min-height: 300px;
+  overflow: hidden;
+}
+
+.chart-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border: 1px solid #f5c6cb;
+}
+
+/* D3 Chart Styling */
+.chart-container svg {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.chart-container .axis {
+  font-size: 12px;
+}
+
+.chart-container .axis path,
+.chart-container .axis line {
+  fill: none;
+  stroke: #666;
+  shape-rendering: crispEdges;
+}
+
+.chart-container .axis text {
+  fill: #666;
+}
+
+.chart-container .grid line {
+  stroke: #e0e0e0;
+  stroke-dasharray: 2,2;
+}
+
+.chart-container .grid path {
+  stroke-width: 0;
+}
+
+/* Tooltip styling for future enhancement */
+.chart-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chart-section {
+    padding: 1.5rem;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .time-period-selector,
+  .date-selector {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .time-period-selector select,
+  .date-selector input {
+    flex: 1;
+    max-width: 200px;
+  }
+  
+  .chart-container {
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-section {
+    padding: 1rem;
+  }
+  
+  .chart-header h4 {
+    font-size: 1.1rem;
+  }
+  
+  .time-period-selector,
+  .date-selector {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .time-period-selector select,
+  .date-selector input {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .chart-container {
+    min-height: 200px;
+  }
+}
