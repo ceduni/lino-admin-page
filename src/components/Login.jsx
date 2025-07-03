@@ -22,7 +22,7 @@ function Login() {
       
       if (data.token) {
         tokenService.setToken(data.token)
-        navigate('/dashboard')
+        navigate('/main')
       } else {
         setError('Login failed - no token received')
       }
