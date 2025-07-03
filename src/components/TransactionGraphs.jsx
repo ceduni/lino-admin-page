@@ -297,129 +297,65 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .domain([0, maxValue])
       .range([height, 0])
 
-    // Use different chart types based on time period
-    const useBarChart = (timePeriod === '1year' || timePeriod === '6months')
+    // Always use bar chart - calculate bar width with no padding
+    const barWidth = Math.max(width / transactionData.length / 3, 8) // Adaptive bar width, minimum 8px
 
-    if (useBarChart) {
-      // Bar chart for monthly data - centered on time points
-      const xScale = d3.scaleTime()
-        .domain(d3.extent(transactionData, d => new Date(d.date)))
-        .range([0, width])
+    // Create x-scale with padding to prevent overflow on the left
+    const dateExtent = d3.extent(transactionData, d => new Date(d.date))
+    const timePadding = (dateExtent[1] - dateExtent[0]) * 0.05 // 5% padding on each side
+    
+    const xScale = d3.scaleTime()
+      .domain([new Date(dateExtent[0].getTime() - timePadding), new Date(dateExtent[1].getTime() + timePadding)])
+      .range([0, width])
 
-      const barWidth = Math.max(width / transactionData.length / 3, 8) // Adaptive bar width, minimum 8px
-
-      // Add axes with explicit tick values to align with data points
-      g.append('g')
-        .attr('transform', `translate(0,${height})`)
-        .call(d3.axisBottom(xScale)
-          .tickValues(transactionData.map(d => new Date(d.date)))
-          .tickFormat(d3.timeFormat('%b %Y')))
-        .selectAll('text')
-        .style('text-anchor', 'end')
-        .attr('dx', '-.8em')
-        .attr('dy', '.15em')
-        .attr('transform', 'rotate(-45)')
-
-      g.append('g')
-        .call(d3.axisLeft(yScale).ticks(Math.min(maxValue, 10)).tickFormat(d3.format('d')))
-
-      // Add bars for taken books - centered on date
-      g.selectAll('.taken-bar')
-        .data(transactionData)
-        .enter().append('rect')
-        .attr('class', 'taken-bar')
-        .attr('x', d => xScale(new Date(d.date)) - barWidth)
-        .attr('y', d => yScale(d.takenBooks))
-        .attr('width', barWidth)
-        .attr('height', d => height - yScale(d.takenBooks))
-        .attr('fill', '#e74c3c')
-        .attr('opacity', 0.8)
-
-      // Add bars for given books - centered on date
-      g.selectAll('.given-bar')
-        .data(transactionData)
-        .enter().append('rect')
-        .attr('class', 'given-bar')
-        .attr('x', d => xScale(new Date(d.date)) - barWidth/2)
-        .attr('y', d => yScale(d.givenBooks))
-        .attr('width', barWidth)
-        .attr('height', d => height - yScale(d.givenBooks))
-        .attr('fill', '#27ae60')
-        .attr('opacity', 0.8)
-
+    // Determine axis format based on time period
+    let xAxisFormat
+    if (timePeriod === '1year' || timePeriod === '6months') {
+      xAxisFormat = d3.timeFormat('%b %Y')
+    } else if (timePeriod === '3months') {
+      xAxisFormat = d3.timeFormat('%m/%d')
     } else {
-      // Line chart for daily/weekly data
-      const xScale = d3.scaleTime()
-        .domain(d3.extent(transactionData, d => new Date(d.date)))
-        .range([0, width])
-
-      const takenLine = d3.line()
-        .x(d => xScale(new Date(d.date)))
-        .y(d => yScale(d.takenBooks))
-        .curve(d3.curveLinear)
-
-      const givenLine = d3.line()
-        .x(d => xScale(new Date(d.date)))
-        .y(d => yScale(d.givenBooks))
-        .curve(d3.curveLinear)
-
-      // Add axes with explicit tick values to align with data points
-      let xAxisFormat
-      
-      if (timePeriod === '3months') {
-        xAxisFormat = d3.timeFormat('%m/%d') // "01/15" for weeks
-      } else {
-        xAxisFormat = d3.timeFormat('%m/%d') // "01/15" for days
-      }
-
-      g.append('g')
-        .attr('transform', `translate(0,${height})`)
-        .call(d3.axisBottom(xScale)
-          .tickValues(transactionData.map(d => new Date(d.date)))
-          .tickFormat(xAxisFormat))
-        .selectAll('text')
-        .style('text-anchor', 'end')
-        .attr('dx', '-.8em')
-        .attr('dy', '.15em')
-        .attr('transform', 'rotate(-45)')
-
-      g.append('g')
-        .call(d3.axisLeft(yScale).ticks(Math.min(maxValue, 10)).tickFormat(d3.format('d')))
-
-      // Add lines
-      g.append('path')
-        .datum(transactionData)
-        .attr('fill', 'none')
-        .attr('stroke', '#e74c3c')
-        .attr('stroke-width', 2)
-        .attr('d', takenLine)
-
-      g.append('path')
-        .datum(transactionData)
-        .attr('fill', 'none')
-        .attr('stroke', '#27ae60')
-        .attr('stroke-width', 2)
-        .attr('d', givenLine)
-
-      // Add dots
-      g.selectAll('.taken-dot')
-        .data(transactionData)
-        .enter().append('circle')
-        .attr('class', 'taken-dot')
-        .attr('cx', d => xScale(new Date(d.date)))
-        .attr('cy', d => yScale(d.takenBooks))
-        .attr('r', 3)
-        .attr('fill', '#e74c3c')
-
-      g.selectAll('.given-dot')
-        .data(transactionData)
-        .enter().append('circle')
-        .attr('class', 'given-dot')
-        .attr('cx', d => xScale(new Date(d.date)))
-        .attr('cy', d => yScale(d.givenBooks))
-        .attr('r', 3)
-        .attr('fill', '#27ae60')
+      xAxisFormat = d3.timeFormat('%m/%d')
     }
+
+    // Add axes with explicit tick values to align with data points
+    g.append('g')
+      .attr('transform', `translate(0,${height})`)
+      .call(d3.axisBottom(xScale)
+        .tickValues(transactionData.map(d => new Date(d.date)))
+        .tickFormat(xAxisFormat))
+      .selectAll('text')
+      .style('text-anchor', 'end')
+      .attr('dx', '-.8em')
+      .attr('dy', '.15em')
+      .attr('transform', 'rotate(-45)')
+
+    g.append('g')
+      .call(d3.axisLeft(yScale).ticks(Math.min(maxValue, 10)).tickFormat(d3.format('d')))
+
+    // Add bars for given books - positioned on the LEFT side of the date
+    g.selectAll('.given-bar')
+      .data(transactionData)
+      .enter().append('rect')
+      .attr('class', 'given-bar')
+      .attr('x', d => xScale(new Date(d.date)) - barWidth)
+      .attr('y', d => yScale(d.givenBooks))
+      .attr('width', barWidth)
+      .attr('height', d => height - yScale(d.givenBooks))
+      .attr('fill', '#27ae60')
+      .attr('opacity', 0.8)
+
+    // Add bars for taken books - positioned on the RIGHT side of the date
+    g.selectAll('.taken-bar')
+      .data(transactionData)
+      .enter().append('rect')
+      .attr('class', 'taken-bar')
+      .attr('x', d => xScale(new Date(d.date)))
+      .attr('y', d => yScale(d.takenBooks))
+      .attr('width', barWidth)
+      .attr('height', d => height - yScale(d.takenBooks))
+      .attr('fill', '#339cff')
+      .attr('opacity', 0.8)
 
     // Add axis labels
     g.append('text')
@@ -441,69 +377,36 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
     const legend = g.append('g')
       .attr('transform', `translate(${width - 70}, 20)`)
 
-    if (useBarChart) {
-      // Rectangle legend for bar chart
-      legend.append('rect')
-        .attr('x', 0)
-        .attr('y', -5)
-        .attr('width', 15)
-        .attr('height', 10)
-        .attr('fill', '#e74c3c')
-        .attr('opacity', 0.8)
+    // Rectangle legend for bar chart
+    legend.append('rect')
+      .attr('x', 0)
+      .attr('y', -5)
+      .attr('width', 15)
+      .attr('height', 10)
+      .attr('fill', '#339cff')
+      .attr('opacity', 0.8)
 
-      legend.append('text')
-        .attr('x', 20)
-        .attr('y', 0)
-        .attr('dy', '0.35em')
-        .style('font-size', '12px')
-        .text('Taken')
+    legend.append('text')
+      .attr('x', 20)
+      .attr('y', 0)
+      .attr('dy', '0.35em')
+      .style('font-size', '12px')
+      .text('Taken')
 
-      legend.append('rect')
-        .attr('x', 0)
-        .attr('y', 15)
-        .attr('width', 15)
-        .attr('height', 10)
-        .attr('fill', '#27ae60')
-        .attr('opacity', 0.8)
+    legend.append('rect')
+      .attr('x', 0)
+      .attr('y', 15)
+      .attr('width', 15)
+      .attr('height', 10)
+      .attr('fill', '#27ae60')
+      .attr('opacity', 0.8)
 
-      legend.append('text')
-        .attr('x', 20)
-        .attr('y', 20)
-        .attr('dy', '0.35em')
-        .style('font-size', '12px')
-        .text('Given')
-    } else {
-      // Line legend for line chart
-      legend.append('line')
-        .attr('x1', 0)
-        .attr('x2', 15)
-        .attr('y1', 0)
-        .attr('y2', 0)
-        .attr('stroke', '#e74c3c')
-        .attr('stroke-width', 2)
-
-      legend.append('text')
-        .attr('x', 20)
-        .attr('y', 0)
-        .attr('dy', '0.35em')
-        .style('font-size', '12px')
-        .text('Taken')
-
-      legend.append('line')
-        .attr('x1', 0)
-        .attr('x2', 15)
-        .attr('y1', 20)
-        .attr('y2', 20)
-        .attr('stroke', '#27ae60')
-        .attr('stroke-width', 2)
-
-      legend.append('text')
-        .attr('x', 20)
-        .attr('y', 20)
-        .attr('dy', '0.35em')
-        .style('font-size', '12px')
-        .text('Given')
-    }
+    legend.append('text')
+      .attr('x', 20)
+      .attr('y', 20)
+      .attr('dy', '0.35em')
+      .style('font-size', '12px')
+      .text('Given')
   }
 
   const drawHourlyChart = () => {
@@ -535,8 +438,6 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .domain([0, maxValue])
       .range([height, 0])
 
-    const barWidth = Math.max(width / 48, 6) // Two bars per hour, minimum 6px
-
     // Add axes with integer ticks
     g.append('g')
       .attr('transform', `translate(0,${height})`)
@@ -561,42 +462,64 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .style('font-size', '12px')
       .text('Hour of Day')
 
-    // Add bars for taken books - centered on hour
-    g.selectAll('.taken-bar')
-      .data(hourlyData)
-      .enter().append('rect')
-      .attr('class', 'taken-bar')
-      .attr('x', d => xScale(d.hour) - barWidth)
-      .attr('y', d => yScale(d.takenBooks))
-      .attr('width', barWidth)
-      .attr('height', d => height - yScale(d.takenBooks))
-      .attr('fill', '#e74c3c')
-      .attr('opacity', 0.8)
+    // Create line generators
+    const takenLine = d3.line()
+      .x(d => xScale(d.hour))
+      .y(d => yScale(d.takenBooks))
+      .curve(d3.curveLinear)
 
-    // Add bars for given books - centered on hour
-    g.selectAll('.given-bar')
+    const givenLine = d3.line()
+      .x(d => xScale(d.hour))
+      .y(d => yScale(d.givenBooks))
+      .curve(d3.curveLinear)
+
+    // Add lines
+    g.append('path')
+      .datum(hourlyData)
+      .attr('fill', 'none')
+      .attr('stroke', '#339cff')
+      .attr('stroke-width', 2)
+      .attr('d', takenLine)
+
+    g.append('path')
+      .datum(hourlyData)
+      .attr('fill', 'none')
+      .attr('stroke', '#27ae60')
+      .attr('stroke-width', 2)
+      .attr('d', givenLine)
+
+    // Add dots for taken books
+    g.selectAll('.taken-dot')
       .data(hourlyData)
-      .enter().append('rect')
-      .attr('class', 'given-bar')
-      .attr('x', d => xScale(d.hour) - barWidth/2)
-      .attr('y', d => yScale(d.givenBooks))
-      .attr('width', barWidth)
-      .attr('height', d => height - yScale(d.givenBooks))
+      .enter().append('circle')
+      .attr('class', 'taken-dot')
+      .attr('cx', d => xScale(d.hour))
+      .attr('cy', d => yScale(d.takenBooks))
+      .attr('r', 3)
+      .attr('fill', '#339cff')
+
+    // Add dots for given books
+    g.selectAll('.given-dot')
+      .data(hourlyData)
+      .enter().append('circle')
+      .attr('class', 'given-dot')
+      .attr('cx', d => xScale(d.hour))
+      .attr('cy', d => yScale(d.givenBooks))
+      .attr('r', 3)
       .attr('fill', '#27ae60')
-      .attr('opacity', 0.8)
 
     // Add legend
     const legend = g.append('g')
       .attr('transform', `translate(${width - 70}, 20)`)
 
-    // Rectangle legend for bar chart
-    legend.append('rect')
-      .attr('x', 0)
-      .attr('y', -5)
-      .attr('width', 15)
-      .attr('height', 10)
-      .attr('fill', '#e74c3c')
-      .attr('opacity', 0.8)
+    // Line legend for line chart
+    legend.append('line')
+      .attr('x1', 0)
+      .attr('x2', 15)
+      .attr('y1', 0)
+      .attr('y2', 0)
+      .attr('stroke', '#339cff')
+      .attr('stroke-width', 2)
 
     legend.append('text')
       .attr('x', 20)
@@ -605,13 +528,13 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .style('font-size', '12px')
       .text('Taken')
 
-    legend.append('rect')
-      .attr('x', 0)
-      .attr('y', 15)
-      .attr('width', 15)
-      .attr('height', 10)
-      .attr('fill', '#27ae60')
-      .attr('opacity', 0.8)
+    legend.append('line')
+      .attr('x1', 0)
+      .attr('x2', 15)
+      .attr('y1', 20)
+      .attr('y2', 20)
+      .attr('stroke', '#27ae60')
+      .attr('stroke-width', 2)
 
     legend.append('text')
       .attr('x', 20)
