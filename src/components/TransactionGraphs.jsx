@@ -269,12 +269,21 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
 
   useEffect(() => {
     if (hourlyData.length > 0) {
-      drawHourlyChart()
+      drawHourlyChartWrapper()
     }
   }, [hourlyData])
 
-  const drawDailyChart = () => {
-    const container = dailyChartRef.current
+  // Reusable function to draw time-based charts (daily/weekly/monthly)
+  const drawTimeChart = (container, data, options = {}) => {
+    const {
+      curveType = d3.curveLinear,
+      takenColor = '#339cff',
+      givenColor = '#27ae60',
+      xAxisLabel = 'Date',
+      yAxisLabel = 'Number of Books',
+      xAxisFormat = d3.timeFormat('%m/%d')
+    } = options
+
     if (!container) return
 
     // Clear previous chart
@@ -292,37 +301,24 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
     const g = svg.append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`)
 
-    const maxValue = d3.max(transactionData, d => Math.max(d.takenBooks, d.givenBooks)) || 1
+    const maxValue = d3.max(data, d => Math.max(d.takenBooks, d.givenBooks)) || 1
     const yScale = d3.scaleLinear()
       .domain([0, maxValue])
       .range([height, 0])
 
-    // Always use bar chart - calculate bar width with no padding
-    const barWidth = Math.max(width / transactionData.length / 3, 8) // Adaptive bar width, minimum 8px
-
-    // Create x-scale with padding to prevent overflow on the left
-    const dateExtent = d3.extent(transactionData, d => new Date(d.date))
+    // Create x-scale with padding to prevent overflow
+    const dateExtent = d3.extent(data, d => new Date(d.date))
     const timePadding = (dateExtent[1] - dateExtent[0]) * 0.05 // 5% padding on each side
     
     const xScale = d3.scaleTime()
       .domain([new Date(dateExtent[0].getTime() - timePadding), new Date(dateExtent[1].getTime() + timePadding)])
       .range([0, width])
 
-    // Determine axis format based on time period
-    let xAxisFormat
-    if (timePeriod === '1year' || timePeriod === '6months') {
-      xAxisFormat = d3.timeFormat('%b %Y')
-    } else if (timePeriod === '3months') {
-      xAxisFormat = d3.timeFormat('%m/%d')
-    } else {
-      xAxisFormat = d3.timeFormat('%m/%d')
-    }
-
     // Add axes with explicit tick values to align with data points
     g.append('g')
       .attr('transform', `translate(0,${height})`)
       .call(d3.axisBottom(xScale)
-        .tickValues(transactionData.map(d => new Date(d.date)))
+        .tickValues(data.map(d => new Date(d.date)))
         .tickFormat(xAxisFormat))
       .selectAll('text')
       .style('text-anchor', 'end')
@@ -333,29 +329,94 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
     g.append('g')
       .call(d3.axisLeft(yScale).ticks(Math.min(maxValue, 10)).tickFormat(d3.format('d')))
 
-    // Add bars for given books - positioned on the LEFT side of the date
-    g.selectAll('.given-bar')
-      .data(transactionData)
-      .enter().append('rect')
-      .attr('class', 'given-bar')
-      .attr('x', d => xScale(new Date(d.date)) - barWidth)
-      .attr('y', d => yScale(d.givenBooks))
-      .attr('width', barWidth)
-      .attr('height', d => height - yScale(d.givenBooks))
-      .attr('fill', '#27ae60')
-      .attr('opacity', 0.8)
+    // Create line generators
+    const takenLine = d3.line()
+      .x(d => xScale(new Date(d.date)))
+      .y(d => yScale(d.takenBooks))
+      .curve(curveType)
 
-    // Add bars for taken books - positioned on the RIGHT side of the date
-    g.selectAll('.taken-bar')
-      .data(transactionData)
-      .enter().append('rect')
-      .attr('class', 'taken-bar')
-      .attr('x', d => xScale(new Date(d.date)))
-      .attr('y', d => yScale(d.takenBooks))
-      .attr('width', barWidth)
-      .attr('height', d => height - yScale(d.takenBooks))
-      .attr('fill', '#339cff')
-      .attr('opacity', 0.8)
+    const givenLine = d3.line()
+      .x(d => xScale(new Date(d.date)))
+      .y(d => yScale(d.givenBooks))
+      .curve(curveType)
+
+    // Add lines
+    g.append('path')
+      .datum(data)
+      .attr('fill', 'none')
+      .attr('stroke', takenColor)
+      .attr('stroke-width', 2)
+      .attr('d', takenLine)
+
+    g.append('path')
+      .datum(data)
+      .attr('fill', 'none')
+      .attr('stroke', givenColor)
+      .attr('stroke-width', 2)
+      .attr('d', givenLine)
+
+    // Create tooltip
+    const tooltip = d3.select(container)
+      .append('div')
+      .style('position', 'absolute')
+      .style('background', 'rgba(0, 0, 0, 0.8)')
+      .style('color', 'white')
+      .style('padding', '8px')
+      .style('border-radius', '4px')
+      .style('font-size', '12px')
+      .style('pointer-events', 'none')
+      .style('opacity', 0)
+      .style('z-index', 1000)
+
+    // Add dots for taken books
+    g.selectAll('.taken-dot')
+      .data(data)
+      .enter().append('circle')
+      .attr('class', 'taken-dot')
+      .attr('cx', d => xScale(new Date(d.date)))
+      .attr('cy', d => yScale(d.takenBooks))
+      .attr('r', 3)
+      .attr('fill', takenColor)
+      .style('cursor', 'pointer')
+      .on('mouseover', (event, d) => {
+        d3.select(event.target).attr('r', 5)
+        tooltip.transition().duration(200).style('opacity', 1)
+        tooltip.html(`
+          <strong>Date:</strong> ${new Date(d.date).toLocaleDateString()}<br/>
+          <strong>Books Taken:</strong> ${d.takenBooks}
+        `)
+        .style('left', (event.pageX + 10) + 'px')
+        .style('top', (event.pageY - 10) + 'px')
+      })
+      .on('mouseout', (event) => {
+        d3.select(event.target).attr('r', 3)
+        tooltip.transition().duration(200).style('opacity', 0)
+      })
+
+    // Add dots for given books
+    g.selectAll('.given-dot')
+      .data(data)
+      .enter().append('circle')
+      .attr('class', 'given-dot')
+      .attr('cx', d => xScale(new Date(d.date)))
+      .attr('cy', d => yScale(d.givenBooks))
+      .attr('r', 3)
+      .attr('fill', givenColor)
+      .style('cursor', 'pointer')
+      .on('mouseover', (event, d) => {
+        d3.select(event.target).attr('r', 5)
+        tooltip.transition().duration(200).style('opacity', 1)
+        tooltip.html(`
+          <strong>Date:</strong> ${new Date(d.date).toLocaleDateString()}<br/>
+          <strong>Books Given:</strong> ${d.givenBooks}
+        `)
+        .style('left', (event.pageX + 10) + 'px')
+        .style('top', (event.pageY - 10) + 'px')
+      })
+      .on('mouseout', (event) => {
+        d3.select(event.target).attr('r', 3)
+        tooltip.transition().duration(200).style('opacity', 0)
+      })
 
     // Add axis labels
     g.append('text')
@@ -365,26 +426,26 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .attr('dy', '1em')
       .style('text-anchor', 'middle')
       .style('font-size', '12px')
-      .text('Number of Books')
+      .text(yAxisLabel)
 
     g.append('text')
       .attr('transform', `translate(${width / 2}, ${height + margin.bottom - 10})`)
       .style('text-anchor', 'middle')
       .style('font-size', '12px')
-      .text('Date')
+      .text(xAxisLabel)
 
     // Add legend
     const legend = g.append('g')
       .attr('transform', `translate(${width - 70}, 20)`)
 
-    // Rectangle legend for bar chart
-    legend.append('rect')
-      .attr('x', 0)
-      .attr('y', -5)
-      .attr('width', 15)
-      .attr('height', 10)
-      .attr('fill', '#339cff')
-      .attr('opacity', 0.8)
+    // Line legend
+    legend.append('line')
+      .attr('x1', 0)
+      .attr('x2', 15)
+      .attr('y1', 0)
+      .attr('y2', 0)
+      .attr('stroke', takenColor)
+      .attr('stroke-width', 2)
 
     legend.append('text')
       .attr('x', 20)
@@ -393,13 +454,13 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .style('font-size', '12px')
       .text('Taken')
 
-    legend.append('rect')
-      .attr('x', 0)
-      .attr('y', 15)
-      .attr('width', 15)
-      .attr('height', 10)
-      .attr('fill', '#27ae60')
-      .attr('opacity', 0.8)
+    legend.append('line')
+      .attr('x1', 0)
+      .attr('x2', 15)
+      .attr('y1', 20)
+      .attr('y2', 20)
+      .attr('stroke', givenColor)
+      .attr('stroke-width', 2)
 
     legend.append('text')
       .attr('x', 20)
@@ -409,8 +470,16 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .text('Given')
   }
 
-  const drawHourlyChart = () => {
-    const container = hourlyChartRef.current
+  // Reusable function to draw hourly charts
+  const drawHourlyChart = (container, data, options = {}) => {
+    const {
+      curveType = d3.curveLinear,
+      takenColor = '#339cff',
+      givenColor = '#27ae60',
+      xAxisLabel = 'Hour of Day',
+      yAxisLabel = 'Number of Books'
+    } = options
+
     if (!container) return
 
     // Clear previous chart
@@ -433,7 +502,7 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .domain([0, 23])
       .range([0, width])
 
-    const maxValue = d3.max(hourlyData, d => Math.max(d.takenBooks, d.givenBooks)) || 1
+    const maxValue = d3.max(data, d => Math.max(d.takenBooks, d.givenBooks)) || 1
     const yScale = d3.scaleLinear()
       .domain([0, maxValue])
       .range([height, 0])
@@ -454,59 +523,102 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .attr('dy', '1em')
       .style('text-anchor', 'middle')
       .style('font-size', '12px')
-      .text('Number of Books')
+      .text(yAxisLabel)
 
     g.append('text')
       .attr('transform', `translate(${width / 2}, ${height + margin.bottom - 10})`)
       .style('text-anchor', 'middle')
       .style('font-size', '12px')
-      .text('Hour of Day')
+      .text(xAxisLabel)
 
     // Create line generators
     const takenLine = d3.line()
       .x(d => xScale(d.hour))
       .y(d => yScale(d.takenBooks))
-      .curve(d3.curveLinear)
+      .curve(curveType)
 
     const givenLine = d3.line()
       .x(d => xScale(d.hour))
       .y(d => yScale(d.givenBooks))
-      .curve(d3.curveLinear)
+      .curve(curveType)
 
     // Add lines
     g.append('path')
-      .datum(hourlyData)
+      .datum(data)
       .attr('fill', 'none')
-      .attr('stroke', '#339cff')
+      .attr('stroke', takenColor)
       .attr('stroke-width', 2)
       .attr('d', takenLine)
 
     g.append('path')
-      .datum(hourlyData)
+      .datum(data)
       .attr('fill', 'none')
-      .attr('stroke', '#27ae60')
+      .attr('stroke', givenColor)
       .attr('stroke-width', 2)
       .attr('d', givenLine)
 
+    // Create tooltip
+    const tooltip = d3.select(container)
+      .append('div')
+      .style('position', 'absolute')
+      .style('background', 'rgba(0, 0, 0, 0.8)')
+      .style('color', 'white')
+      .style('padding', '8px')
+      .style('border-radius', '4px')
+      .style('font-size', '12px')
+      .style('pointer-events', 'none')
+      .style('opacity', 0)
+      .style('z-index', 1000)
+
     // Add dots for taken books
     g.selectAll('.taken-dot')
-      .data(hourlyData)
+      .data(data)
       .enter().append('circle')
       .attr('class', 'taken-dot')
       .attr('cx', d => xScale(d.hour))
       .attr('cy', d => yScale(d.takenBooks))
       .attr('r', 3)
-      .attr('fill', '#339cff')
+      .attr('fill', takenColor)
+      .style('cursor', 'pointer')
+      .on('mouseover', (event, d) => {
+        d3.select(event.target).attr('r', 5)
+        tooltip.transition().duration(200).style('opacity', 1)
+        tooltip.html(`
+          <strong>Hour:</strong> ${d.hour}:00<br/>
+          <strong>Books Taken:</strong> ${d.takenBooks}
+        `)
+        .style('left', (event.pageX + 10) + 'px')
+        .style('top', (event.pageY - 10) + 'px')
+      })
+      .on('mouseout', (event) => {
+        d3.select(event.target).attr('r', 3)
+        tooltip.transition().duration(200).style('opacity', 0)
+      })
 
     // Add dots for given books
     g.selectAll('.given-dot')
-      .data(hourlyData)
+      .data(data)
       .enter().append('circle')
       .attr('class', 'given-dot')
       .attr('cx', d => xScale(d.hour))
       .attr('cy', d => yScale(d.givenBooks))
       .attr('r', 3)
-      .attr('fill', '#27ae60')
+      .attr('fill', givenColor)
+      .style('cursor', 'pointer')
+      .on('mouseover', (event, d) => {
+        d3.select(event.target).attr('r', 5)
+        tooltip.transition().duration(200).style('opacity', 1)
+        tooltip.html(`
+          <strong>Hour:</strong> ${d.hour}:00<br/>
+          <strong>Books Given:</strong> ${d.givenBooks}
+        `)
+        .style('left', (event.pageX + 10) + 'px')
+        .style('top', (event.pageY - 10) + 'px')
+      })
+      .on('mouseout', (event) => {
+        d3.select(event.target).attr('r', 3)
+        tooltip.transition().duration(200).style('opacity', 0)
+      })
 
     // Add legend
     const legend = g.append('g')
@@ -518,7 +630,7 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .attr('x2', 15)
       .attr('y1', 0)
       .attr('y2', 0)
-      .attr('stroke', '#339cff')
+      .attr('stroke', takenColor)
       .attr('stroke-width', 2)
 
     legend.append('text')
@@ -533,7 +645,7 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .attr('x2', 15)
       .attr('y1', 20)
       .attr('y2', 20)
-      .attr('stroke', '#27ae60')
+      .attr('stroke', givenColor)
       .attr('stroke-width', 2)
 
     legend.append('text')
@@ -542,6 +654,34 @@ function TransactionGraphs({ bookBoxId, bookBoxName }) {
       .attr('dy', '0.35em')
       .style('font-size', '12px')
       .text('Given')
+  }
+
+  // Wrapper functions for the specific charts
+  const drawDailyChart = () => {
+    // Determine axis format based on time period
+    let xAxisFormat
+    if (timePeriod === '1year' || timePeriod === '6months') {
+      xAxisFormat = d3.timeFormat('%b %Y')
+    } else if (timePeriod === '3months') {
+      xAxisFormat = d3.timeFormat('%m/%d')
+    } else {
+      xAxisFormat = d3.timeFormat('%m/%d')
+    }
+
+    drawTimeChart(dailyChartRef.current, transactionData, {
+      curveType: d3.curveLinear,
+      takenColor: '#339cff',
+      givenColor: '#27ae60',
+      xAxisFormat: xAxisFormat
+    })
+  }
+
+  const drawHourlyChartWrapper = () => {
+    drawHourlyChart(hourlyChartRef.current, hourlyData, {
+      curveType: d3.curveLinear,
+      takenColor: '#339cff',
+      givenColor: '#27ae60'
+    })
   }
 
   return (
