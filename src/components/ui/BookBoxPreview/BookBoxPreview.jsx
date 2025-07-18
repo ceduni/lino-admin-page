@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { bookboxesAPI } from '../services/api'
+import { bookboxesAPI } from '../../../services/api'
 import './BookBoxPreview.css'
 
 function BookBoxPreview({ bookboxId, onClose }) {
@@ -156,10 +156,27 @@ function BookBoxPreview({ bookboxId, onClose }) {
         </div>
       )}
       
-      <div className="preview-location">
-        <span className="location-coords">
-          📍 {bookBox.latitude.toFixed(6)}, {bookBox.longitude.toFixed(6)}
-        </span>
+      <div className="preview-details">
+        <div className="preview-location">
+          <span className="location-coords">
+            📍 {bookBox.latitude.toFixed(6)}, {bookBox.longitude.toFixed(6)}
+          </span>
+        </div>
+        
+        <div className="preview-metadata">
+          {bookBox.owner && (
+            <div className="metadata-item">
+              <span className="metadata-label">Owner:</span>
+              <span className="metadata-value">{bookBox.owner}</span>
+            </div>
+          )}
+          <div className="metadata-item">
+            <span className="metadata-label">Status:</span>
+            <span className={`metadata-value status-${bookBox.isActive ? 'active' : 'inactive'}`}>
+              {bookBox.isActive ? '🟢 Active' : '🔴 Inactive'}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   )

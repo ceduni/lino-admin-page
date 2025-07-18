@@ -1,16 +1,34 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { tokenService } from './services/api'
-import Login from './components/Login'
-import MainPage from './components/MainPage'
-import BookBoxDetail from './components/BookBoxDetail'
-import RegisterBookBox from './components/RegisterBookBox'
-import ManageBookBoxUpdate from './components/ManageBookBoxUpdate'
-import LookupTransactions from './components/LookupTransactions'
-import ProtectedRoute from './components/ProtectedRoute'
+import Login from './pages/auth/Login'
+import MainPage from './pages/MainPage/MainPage'
+import BookBoxDetail from './pages/bookbox/BookBoxDetail'
+import BookBoxStats from './pages/bookbox/BookBoxStats'
+import RegisterBookBox from './pages/bookbox/RegisterBookBox'
+import UpdateBookBoxPage from './pages/bookbox/UpdateBookBoxPage'
+import LookupTransactions from './pages/transactions/LookupTransactions'
+import ProtectedRoute from './utils/ProtectedRoute'
 
 function App() {
-  // If user is already authenticated, redirect to main page
-  const isAuthenticated = tokenService.isAuthenticated()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Check authentication status on component mount
+    const checkAuth = () => {
+      const authenticated = tokenService.isAuthenticated()
+      setIsAuthenticated(authenticated)
+      setIsLoading(false)
+    }
+    
+    checkAuth()
+  }, [])
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <Router>
@@ -38,6 +56,14 @@ function App() {
           } 
         />
         <Route 
+          path="/book-box/:id/stats" 
+          element={
+            <ProtectedRoute>
+              <BookBoxStats />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/register-book-box" 
           element={
             <ProtectedRoute>
@@ -46,10 +72,10 @@ function App() {
           } 
         />
         <Route 
-          path="/manage-book-boxes/:id" 
+          path="/update-book-box/:id" 
           element={
             <ProtectedRoute>
-              <ManageBookBoxUpdate />
+              <UpdateBookBoxPage />
             </ProtectedRoute>
           } 
         />

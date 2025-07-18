@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Wrapper } from '@googlemaps/react-wrapper'
-import { tokenService, bookboxesAPI, qrCodeAPI } from '../services/api'
-import logo from '../assets/logo.png'
-import './SubPage.css'
-import './ManageBookBoxes.css'
+import { tokenService, bookboxesAPI, qrCodeAPI } from '../../services/api'
+import logo from '../../assets/logo.png'
+import '../MainPage/SubPage.css'
+import './UpdateBookBoxPage.css'
 
-function ManageBookBoxUpdate() {
+function UpdateBookBoxPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [selectedBookBox, setSelectedBookBox] = useState(null)
@@ -137,7 +137,7 @@ function ManageBookBoxUpdate() {
         infoText: updateFormData.infoText || ''
       }
 
-      await bookboxesAPI.updateBookBox(selectedBookBox.id, updateData)
+      await bookboxesAPI.updateBookBox(selectedBookBox._id, updateData)
       
       // Navigate back to book box detail page
       navigate(`/book-box/${id}`)
@@ -157,7 +157,7 @@ function ManageBookBoxUpdate() {
 
     try {
       setIsUpdating(true)
-      await bookboxesAPI.deleteBookBox(selectedBookBox.id)
+      await bookboxesAPI.deleteBookBox(selectedBookBox._id)
       
       // Navigate back to main page after deletion
       navigate('/main')
@@ -177,7 +177,7 @@ function ManageBookBoxUpdate() {
 
     try {
       // Generate QR code with the book box ID
-      const qrBlob = await qrCodeAPI.createQR(selectedBookBox.id.toString())
+      const qrBlob = await qrCodeAPI.createQR(selectedBookBox._id.toString())
       const qrUrl = await qrCodeAPI.blobToDataURL(qrBlob)
       
       // Store QR code data and show QR section
@@ -476,4 +476,4 @@ function ManageBookBoxUpdate() {
   )
 }
 
-export default ManageBookBoxUpdate
+export default UpdateBookBoxPage

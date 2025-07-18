@@ -111,15 +111,50 @@
   margin: 0;
 }
 
-.preview-location {
+.preview-details {
   border-top: 1px solid #f1f5f9;
   padding-top: 0.5rem;
+}
+
+.preview-location {
+  margin-bottom: 0.5rem;
 }
 
 .location-coords {
   font-size: 0.75rem;
   color: #64748b;
   font-family: monospace;
+}
+
+.preview-metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metadata-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.metadata-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.metadata-value {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.metadata-value.status-active {
+  color: #059669;
+}
+
+.metadata-value.status-inactive {
+  color: #dc2626;
 }
 
 .preview-loading,

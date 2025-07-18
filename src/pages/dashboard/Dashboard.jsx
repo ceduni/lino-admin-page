@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
-import { tokenService } from '../services/api'
-import logo from '../assets/logo.png'
+import { tokenService } from '../../services/api'
+import logo from '../../assets/logo.png'
 import './Dashboard.css'
 
 function Dashboard() {
@@ -20,7 +20,7 @@ function Dashboard() {
   }
 
   const handleManageBookBoxes = () => {
-    navigate('/dashboard/manage-book-boxes')
+    navigate('/dashboard/update-book-box')
   }
 
   return (

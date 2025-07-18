@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format } from 'timeago.js'
-import BookBoxPreview from './BookBoxPreview'
+import BookBoxPreview from '../BookBoxPreview/BookBoxPreview'
 import './TransactionCard.css'
 
 function TransactionCard({ transaction }) {

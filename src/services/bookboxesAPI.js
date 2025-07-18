@@ -29,7 +29,7 @@ export const bookboxesAPI = {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create book box');
+        throw new Error(data.error || 'Failed to create book box');
       }
 
       return data;
@@ -53,7 +53,7 @@ export const bookboxesAPI = {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create book box');
+        throw new Error(data.error || 'Failed to create book box');
       }
 
       return data;
@@ -77,7 +77,7 @@ export const bookboxesAPI = {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch book box');
+      throw new Error(data.error || 'Failed to fetch book box');
     }
 
     return data;
@@ -98,7 +98,7 @@ export const bookboxesAPI = {
 
     if (!response.ok) {
       const data = await response.json();
-      throw new Error(data.message || 'Failed to delete book box');
+      throw new Error(data.error || 'Failed to delete book box');
     }
 
     return { message: 'Book box deleted successfully' };
@@ -131,7 +131,7 @@ export const bookboxesAPI = {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update book box');
+        throw new Error(data.error || 'Failed to update book box');
       }
 
       return data;
@@ -155,7 +155,7 @@ export const bookboxesAPI = {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update book box');
+        throw new Error(data.error || 'Failed to update book box');
       }
 
       return data;
@@ -170,14 +170,12 @@ export const bookboxesAPI = {
 
     // Build query parameters
     const queryParams = new URLSearchParams();
-    if (filters.kw) queryParams.append('kw', filters.kw);
+    if (filters.q) queryParams.append('q', filters.q);
     if (filters.cls) queryParams.append('cls', filters.cls);
     if (filters.asc) queryParams.append('asc', filters.asc);
-    if (filters.longitude) queryParams.append('longitude', filters.longitude.toString());
-    if (filters.latitude) queryParams.append('latitude', filters.latitude.toString());
 
     const queryString = queryParams.toString();
-    const url = `${API_BASE_URL}/bookboxes/search${queryString ? `?${queryString}` : ''}`;
+    const url = `${API_BASE_URL}/admin/bookboxes/search${queryString ? `?${queryString}` : ''}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -190,7 +188,7 @@ export const bookboxesAPI = {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch book boxes');
+      throw new Error(data.error || 'Failed to fetch book boxes');
     }
 
     return data;
@@ -213,7 +211,7 @@ export const bookboxesAPI = {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to deactivate book box');
+      throw new Error(data.error || 'Failed to deactivate book box');
     }
 
     return data;
@@ -236,7 +234,7 @@ export const bookboxesAPI = {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to activate book box');
+      throw new Error(data.error || 'Failed to activate book box');
     }
 
     return data;
@@ -260,7 +258,7 @@ export const bookboxesAPI = {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to transfer book box ownership');
+      throw new Error(data.error || 'Failed to transfer book box ownership');
     }
 
     return data;

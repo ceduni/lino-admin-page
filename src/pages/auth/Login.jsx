@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { authAPI, tokenService } from '../services/api'
-import logo from '../assets/logo.png'
+import { authAPI, adminAPI, tokenService } from '../../services/api'
+import logo from '../../assets/logo.png'
 import './Login.css'
 
 function Login() {
-  const [identifier, setIdentifier] = useState('')
+  const [identifier, setIdentifier] = useState('') 
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -18,16 +18,35 @@ function Login() {
     setError('')
 
     try {
+      // Step 1: Try to log in with identifier+password
       const data = await authAPI.login(identifier, password)
       
       if (data.token) {
         tokenService.setToken(data.token)
-        navigate('/main')
+        
+        // Step 2: Check admin status with the token
+        try {
+          const isAdmin = await adminAPI.checkAdmin()
+          
+          if (isAdmin) {
+            // User is admin, allow access
+            navigate('/main')
+          } else {
+            // User is not admin, prevent access
+            tokenService.removeToken() // Clear the token
+            setError('You do not have admin privileges. Please contact the admin of Lino to make you a fellow admin.')
+          }
+        } catch (adminError) {
+          // If we can't check admin status, prevent access
+          tokenService.removeToken() // Clear the token
+          setError('Unable to verify admin status. Please contact the admin of Lino to make you a fellow admin.')
+        }
       } else {
-        setError('Login failed - no token received')
+        setError('The identifier or password is invalid.')
       }
     } catch (err) {
-      setError(err.message || 'Network error. Please try again.')
+      // Login failed
+      setError('The identifier or password is invalid.')
     } finally {
       setLoading(false)
     }

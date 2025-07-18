@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import * as d3 from 'd3'
-import { transactionsAPI } from '../services/api'
+import { transactionsAPI } from '../../../services/api'
 import './TransactionGraphs.css'
 
-function TransactionGraphs({ bookBoxId, bookBoxName }) {
+function TransactionGraphs({ bookBoxId }) {
   const [timePeriod, setTimePeriod] = useState('1week')
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [isLoading, setIsLoading] = useState(false)

@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wrapper } from '@googlemaps/react-wrapper'
-import { tokenService, bookboxesAPI, qrCodeAPI } from '../services/api'
-import logo from '../assets/logo.png'
-import './SubPage.css'
+import { tokenService, bookboxesAPI, qrCodeAPI } from '../../services/api'
+import logo from '../../assets/logo.png'
+import '../MainPage/SubPage.css'
 import './RegisterBookBox.css'
 
 function RegisterBookBox() {

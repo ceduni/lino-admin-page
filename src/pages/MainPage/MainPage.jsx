@@ -1,42 +1,21 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { tokenService, bookboxesAPI } from '../services/api'
-import logo from '../assets/logo.png'
+import { tokenService, bookboxesAPI } from '../../services/api'
+import logo from '../../assets/logo.png'
 import './SubPage.css'
-import './ManageBookBoxes.css'
 
 function MainPage() {
   const navigate = useNavigate()
   const [searchFilters, setSearchFilters] = useState({
-    kw: '',
+    q: '',
     cls: 'by name',
     asc: true
   })
-  const [userLocation, setUserLocation] = useState(null)
-  const [hasGeolocation, setHasGeolocation] = useState(false)
   const [bookBoxes, setBookBoxes] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Get user's current location for search
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const userPos = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          }
-          setUserLocation(userPos)
-          setHasGeolocation(true)
-        },
-        (error) => {
-          console.warn('Could not get user location:', error)
-          setHasGeolocation(false)
-        }
-      )
-    }
-
     // Load initial book boxes on page load
     handleInitialLoad()
   }, [])
@@ -46,7 +25,7 @@ function MainPage() {
     try {
       // Load all book boxes initially
       const response = await bookboxesAPI.searchBookBoxes({
-        kw: '',
+        q: '',
         cls: 'by name',
         asc: true
       })
@@ -87,15 +66,9 @@ function MainPage() {
 
     try {
       const filters = {
-        kw: searchFilters.kw,
+        q: searchFilters.q,
         cls: searchFilters.cls,
         asc: searchFilters.asc
-      }
-
-      // Add location data if available and searching by location
-      if (hasGeolocation && userLocation && searchFilters.cls === 'by location') {
-        filters.longitude = userLocation.lng
-        filters.latitude = userLocation.lat
       }
 
       const response = await bookboxesAPI.searchBookBoxes(filters)
@@ -109,7 +82,7 @@ function MainPage() {
   }
 
   const handleBookBoxClick = (bookBox) => {
-    navigate(`/book-box/${bookBox.id}`)
+    navigate(`/book-box/${bookBox._id}`)
   }
 
   return (
@@ -148,9 +121,9 @@ function MainPage() {
                   <label htmlFor="kw">Search Query</label>
                   <input
                     type="text"
-                    id="kw"
-                    name="kw"
-                    value={searchFilters.kw}
+                    id="q"
+                    name="q"
+                    value={searchFilters.q}
                     onChange={handleSearchInputChange}
                     placeholder="Enter search keywords..."
                   />
@@ -166,7 +139,6 @@ function MainPage() {
                   >
                     <option value="by name">By Name</option>
                     <option value="by number of books">By Number of Books</option>
-                    {hasGeolocation && <option value="by location">By Location</option>}
                   </select>
                 </div>
                 
@@ -187,12 +159,6 @@ function MainPage() {
                   {isLoading ? 'Searching...' : 'Search'}
                 </button>
               </div>
-              
-              {!hasGeolocation && (
-                <p className="location-warning">
-                  Location access not available. "By Location" search option is disabled.
-                </p>
-              )}
             </div>
           </form>
 
@@ -203,11 +169,11 @@ function MainPage() {
             </div>
           ) : bookBoxes.length > 0 ? (
             <div className="results-section">
-              <h3>Book Boxes ({bookBoxes.length} found)</h3>
+              <h3>Your Book Boxes ({bookBoxes.length} found)</h3>
               <div className="bookbox-grid">
                 {bookBoxes.map((bookBox) => (
                   <div 
-                    key={bookBox.id} 
+                    key={bookBox._id} 
                     className="bookbox-card"
                     onClick={() => handleBookBoxClick(bookBox)}
                   >

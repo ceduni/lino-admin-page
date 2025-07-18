@@ -35,7 +35,7 @@ export const qrCodeAPI = {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to upload image');
+      throw new Error(data.error || 'Failed to upload image');
     }
 
     return data;

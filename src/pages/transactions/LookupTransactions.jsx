@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { tokenService, transactionsAPI } from '../services/api'
-import TransactionCard from './TransactionCard'
-import logo from '../assets/logo.png'
-import './SubPage.css'
+import { tokenService, transactionsAPI } from '../../services/api'
+import TransactionCard from '../../components/ui/TransactionCard/TransactionCard'
+import logo from '../../assets/logo.png'
 import './LookupTransactions.css'
 
 function LookupTransactions() {

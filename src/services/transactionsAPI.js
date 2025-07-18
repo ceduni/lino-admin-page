@@ -29,7 +29,7 @@ export const transactionsAPI = {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch transactions');
+      throw new Error(data.error || 'Failed to fetch transactions');
     }
 
     return data;
