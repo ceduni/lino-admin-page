@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Wrapper } from '@googlemaps/react-wrapper'
-import { tokenService, bookboxesAPI, qrCodeAPI } from '../../services/api'
+import { tokenService, bookboxesAPI, qrCodeAPI, adminAPI } from '../../services/api'
 import logo from '../../assets/logo.png'
 import '../MainPage/SubPage.css'
 import './UpdateBookBoxPage.css'
@@ -27,6 +27,17 @@ function UpdateBookBoxPage() {
   const [qrCodeUrl, setQrCodeUrl] = useState(null)
   const [showQrCode, setShowQrCode] = useState(false)
   const [isGeneratingQr, setIsGeneratingQr] = useState(false)
+  
+  // New states for activation/deactivation and ownership transfer
+  const [showDeactivateDialog, setShowDeactivateDialog] = useState(false)
+  const [showTransferDialog, setShowTransferDialog] = useState(false)
+  const [admins, setAdmins] = useState([])
+  const [filteredAdmins, setFilteredAdmins] = useState([])
+  const [adminSearchQuery, setAdminSearchQuery] = useState('')
+  const [isLoadingAdmins, setIsLoadingAdmins] = useState(false)
+  const [isTransferring, setIsTransferring] = useState(false)
+  const [isToggling, setIsToggling] = useState(false)
+  
   const mapRef = useRef(null)
   const markerRef = useRef(null)
 
@@ -203,6 +214,107 @@ function UpdateBookBoxPage() {
     setShowQrCode(false)
     setQrCodeData(null)
     setQrCodeUrl(null)
+  }
+
+  // New handler functions for activation/deactivation and ownership transfer
+  const handleToggleActivation = async () => {
+    if (!selectedBookBox) return
+
+    if (selectedBookBox.isActive) {
+      // Show deactivation confirmation dialog
+      setShowDeactivateDialog(true)
+    } else {
+      // Activate directly without confirmation
+      await performToggleActivation()
+    }
+  }
+
+  const performToggleActivation = async () => {
+    if (!selectedBookBox) return
+
+    setError('')
+    setIsToggling(true)
+
+    try {
+      if (selectedBookBox.isActive) {
+        await bookboxesAPI.deactivateBookBox(selectedBookBox._id)
+        setSelectedBookBox(prev => ({ ...prev, isActive: false }))
+      } else {
+        await bookboxesAPI.activateBookBox(selectedBookBox._id)
+        setSelectedBookBox(prev => ({ ...prev, isActive: true }))
+      }
+      setShowDeactivateDialog(false)
+    } catch (err) {
+      setError(err.message)
+      console.error('Error toggling book box activation:', err)
+    } finally {
+      setIsToggling(false)
+    }
+  }
+
+  const handleTransferOwnership = async () => {
+    if (!selectedBookBox) return
+
+    setError('')
+    setIsLoadingAdmins(true)
+    
+    try {
+      const adminsList = await adminAPI.getAdmins()
+      setAdmins(adminsList)
+      setFilteredAdmins(adminsList)
+      setShowTransferDialog(true)
+    } catch (err) {
+      setError(err.message)
+      console.error('Error fetching admins:', err)
+    } finally {
+      setIsLoadingAdmins(false)
+    }
+  }
+
+  const handleAdminSearch = (e) => {
+    const query = e.target.value.toLowerCase()
+    setAdminSearchQuery(query)
+    
+    if (query.trim() === '') {
+      setFilteredAdmins(admins)
+    } else {
+      const filtered = admins.filter(admin => 
+        admin.username.toLowerCase().includes(query) ||
+        (admin.name && admin.name.toLowerCase().includes(query))
+      )
+      setFilteredAdmins(filtered)
+    }
+  }
+
+  const handleSelectAdmin = async (adminUsername) => {
+    if (!selectedBookBox || !adminUsername) return
+
+    setError('')
+    setIsTransferring(true)
+
+    try {
+      await bookboxesAPI.transferBookBoxOwnership(selectedBookBox._id, adminUsername)
+      
+      // Show success message and navigate back to main page
+      alert(`Ownership successfully transferred to ${adminUsername}`)
+      navigate('/main')
+    } catch (err) {
+      setError(err.message)
+      console.error('Error transferring ownership:', err)
+    } finally {
+      setIsTransferring(false)
+    }
+  }
+
+  const handleCloseTransferDialog = () => {
+    setShowTransferDialog(false)
+    setAdmins([])
+    setFilteredAdmins([])
+    setAdminSearchQuery('')
+  }
+
+  const handleCloseDeactivateDialog = () => {
+    setShowDeactivateDialog(false)
   }
 
   const initMap = (map) => {
@@ -439,6 +551,22 @@ function UpdateBookBoxPage() {
               </button>
               <button 
                 type="button" 
+                onClick={handleToggleActivation}
+                className={selectedBookBox.isActive ? "deactivate-button" : "activate-button"}
+                disabled={isToggling}
+              >
+                {isToggling ? 'Processing...' : (selectedBookBox.isActive ? '🔴 Deactivate' : '🟢 Activate')}
+              </button>
+              <button 
+                type="button" 
+                onClick={handleTransferOwnership}
+                className="transfer-button"
+                disabled={isLoadingAdmins}
+              >
+                {isLoadingAdmins ? 'Loading...' : '👤 Transfer Ownership'}
+              </button>
+              <button 
+                type="button" 
                 onClick={handleDeleteBookBox}
                 className="delete-button"
                 disabled={isUpdating}
@@ -465,6 +593,94 @@ function UpdateBookBoxPage() {
                   </button>
                   <button onClick={handleCloseQR} className="close-qr-button">
                     Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Deactivation Confirmation Dialog */}
+          {showDeactivateDialog && (
+            <div className="dialog-overlay">
+              <div className="dialog-container">
+                <div className="dialog-header">
+                  <h3>Confirm Deactivation</h3>
+                </div>
+                <div className="dialog-content">
+                  <p>Are you sure you want to deactivate the book box "{selectedBookBox.name}"?</p>
+                  <p>This will make the book box unavailable for transactions.</p>
+                </div>
+                <div className="dialog-actions">
+                  <button 
+                    onClick={performToggleActivation}
+                    className="confirm-button"
+                    disabled={isToggling}
+                  >
+                    {isToggling ? 'Deactivating...' : 'Yes, Deactivate'}
+                  </button>
+                  <button 
+                    onClick={handleCloseDeactivateDialog}
+                    className="cancel-button"
+                    disabled={isToggling}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Transfer Ownership Dialog */}
+          {showTransferDialog && (
+            <div className="dialog-overlay">
+              <div className="dialog-container transfer-dialog">
+                <div className="dialog-header">
+                  <h3>Transfer Ownership</h3>
+                </div>
+                <div className="dialog-content">
+                  <p>Select an admin to transfer ownership of "{selectedBookBox.name}" to:</p>
+                  
+                  {/* Search Bar */}
+                  <div className="admin-search">
+                    <input
+                      type="text"
+                      placeholder="Search admins by name or username..."
+                      value={adminSearchQuery}
+                      onChange={handleAdminSearch}
+                      className="admin-search-input"
+                    />
+                  </div>
+
+                  {/* Admin List */}
+                  <div className="admin-list">
+                    {filteredAdmins.length > 0 ? (
+                      filteredAdmins.map((admin) => (
+                        <div 
+                          key={admin.username}
+                          className="admin-item"
+                          onClick={() => handleSelectAdmin(admin.username)}
+                        >
+                          <div className="admin-info">
+                            <div className="admin-username">{admin.username}</div>
+                            {admin.name && <div className="admin-name">{admin.name}</div>}
+                          </div>
+                          <div className="admin-select-icon">→</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="no-admins">
+                        {adminSearchQuery ? 'No admins found matching your search.' : 'No admins available.'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="dialog-actions">
+                  <button 
+                    onClick={handleCloseTransferDialog}
+                    className="cancel-button"
+                    disabled={isTransferring}
+                  >
+                    Cancel
                   </button>
                 </div>
               </div>

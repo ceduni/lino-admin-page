@@ -1,13 +1,7 @@
-import { API_BASE_URL } from './constants.js';
-import { tokenService } from './tokenService.js';
+import { authenticatedRequest } from './apiUtils.js';
 
 export const transactionsAPI = {
   searchTransactions: async (filters = {}) => {
-    const token = tokenService.getToken();
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
     // Build query parameters
     const queryParams = new URLSearchParams();
     if (filters.username) queryParams.append('username', filters.username);
@@ -16,22 +10,13 @@ export const transactionsAPI = {
     if (filters.limit) queryParams.append('limit', filters.limit.toString());
 
     const queryString = queryParams.toString();
-    const url = `${API_BASE_URL}/books/transactions${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `/search/transactions${queryString ? `?${queryString}` : ''}`;
 
-    const response = await fetch(url, {
+    return await authenticatedRequest(endpoint, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        'Content-Type': undefined, // Remove content-type for GET with no body
       },
     });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to fetch transactions');
-    }
-
-    return data;
   },
 };

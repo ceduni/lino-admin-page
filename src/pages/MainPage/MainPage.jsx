@@ -114,7 +114,7 @@ function MainPage() {
           {/* Search Form */}
           <form onSubmit={handleSearch} className="search-form">
             <div className="search-section">
-              <h3>Search Book Boxes</h3>
+              <h3>Search Your Book Boxes</h3>
               
               <div className="search-row">
                 <div className="form-group">
