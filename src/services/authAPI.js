@@ -31,6 +31,9 @@ export const authAPI = {
   verifyAdminKey: async (adminVerificationKey) => {
     const data = await authenticatedRequest('/admin/set', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         adminVerificationKey,
       }),

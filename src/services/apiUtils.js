@@ -16,7 +16,6 @@ export const authenticatedRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
   const defaultHeaders = {
     'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
   };
 
   const config = {

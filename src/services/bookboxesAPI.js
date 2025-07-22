@@ -4,6 +4,9 @@ export const bookboxesAPI = {
   createBookBox: async ({ name, image, longitude, latitude, infoText }) => {
     return await authenticatedRequest('/admin/bookboxes', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         name,
         image,
@@ -23,9 +26,6 @@ export const bookboxesAPI = {
   deleteBookBox: async (id) => {
     await authenticatedRequest(`/admin/bookboxes/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': undefined, // Remove content-type for DELETE
-      },
     });
     return { message: 'Book box deleted successfully' };
   },
@@ -33,6 +33,9 @@ export const bookboxesAPI = {
   updateBookBox: async (id, { name, image, longitude, latitude, infoText }) => {
     return await authenticatedRequest(`/admin/bookboxes/${id}`, {
       method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         name,
         image,
@@ -55,33 +58,27 @@ export const bookboxesAPI = {
 
     return await authenticatedRequest(endpoint, {
       method: 'GET',
-      headers: {
-        'Content-Type': undefined, // Remove content-type for GET with no body
-      },
     });
   },
 
   deactivateBookBox: async (id) => {
     return await authenticatedRequest(`/admin/bookboxes/${id}/deactivate`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': undefined, // Remove content-type for PATCH with no body
-      },
     });
   },
 
   activateBookBox: async (id) => { 
     return await authenticatedRequest(`/admin/bookboxes/${id}/activate`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': undefined, // Remove content-type for PATCH with no body
-      },
     });
   },
 
   transferBookBoxOwnership: async (id, newOwnerUsername) => {   
     return await authenticatedRequest(`/admin/bookboxes/${id}/transfer`, {
       method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ newOwner: newOwnerUsername }),
     });
   }

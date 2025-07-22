@@ -14,9 +14,6 @@ export const transactionsAPI = {
 
     return await authenticatedRequest(endpoint, {
       method: 'GET',
-      headers: {
-        'Content-Type': undefined, // Remove content-type for GET with no body
-      },
     });
   },
 };
