@@ -26,7 +26,7 @@ function AdminHeader() {
 
   const handleLogout = () => {
     tokenService.removeToken()
-    navigate('/')
+    navigate('/login')
   }
 
   const handleBackToMain = () => {

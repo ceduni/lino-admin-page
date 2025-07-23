@@ -40,6 +40,10 @@ function App() {
             isAuthenticated ? <Navigate to="/main" replace /> : <Login />
           } 
         />
+        <Route
+          path="/login"
+          element={<Login />}
+        />
         <Route 
           path="/main" 
           element={
