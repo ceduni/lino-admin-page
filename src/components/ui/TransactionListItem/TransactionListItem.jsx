@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { format } from 'timeago.js'
-import BookBoxPreview from '../BookBoxPreview/BookBoxPreview'
-import './TransactionCard.css'
+import { useNavigate } from 'react-router-dom'
+import './TransactionListItem.css'
 
-function TransactionCard({ transaction }) {
+function TransactionListItem({ transaction }) {
+  const navigate = useNavigate()
   const [showPreview, setShowPreview] = useState(false)
   const [previewTimeout, setPreviewTimeout] = useState(null)
+
   const formatDate = (timestamp) => {
     const date = new Date(timestamp)
     return date.toLocaleString('en-US', {
@@ -33,26 +35,12 @@ function TransactionCard({ transaction }) {
     return action === 'added' ? '📚' : '📖'
   }
 
-  const handleBookBoxHover = () => {
-    if (previewTimeout) {
-      clearTimeout(previewTimeout)
-    }
-    const timeout = setTimeout(() => {
-      setShowPreview(true)
-    }, 500) // 500ms delay before showing preview
-    setPreviewTimeout(timeout)
-  }
-
-  const handleBookBoxLeave = () => {
-    if (previewTimeout) {
-      clearTimeout(previewTimeout)
-      setPreviewTimeout(null)
-    }
-    setShowPreview(false)
+  const handleBookBoxClick = (bookboxId) => {
+    window.open(`/book-box/${bookboxId}`, '_blank')
   }
 
   return (
-    <div className="transaction-card">
+    <div className="transaction-list-item">
       <div className="transaction-content">
         <div className="transaction-icon">
           {getActionIcon(transaction.action)}
@@ -69,17 +57,10 @@ function TransactionCard({ transaction }) {
             the book <strong>"{transaction.bookTitle}"</strong>{' '}
             {getPreposition(transaction.action)} book box{' '}
             <span 
-              className="bookbox-id-hover"
-              onMouseEnter={handleBookBoxHover}
-              onMouseLeave={handleBookBoxLeave}
+              className="bookbox-id-clickable"
+              onClick={() => handleBookBoxClick(transaction.bookboxId)}
             >
               <strong>{transaction.bookboxId}</strong>
-              {showPreview && (
-                <BookBoxPreview 
-                  bookboxId={transaction.bookboxId}
-                  onClose={() => setShowPreview(false)}
-                />
-              )}
             </span>
           </span>
           <div className="transaction-time">
@@ -91,4 +72,4 @@ function TransactionCard({ transaction }) {
   )
 }
 
-export default TransactionCard
+export default TransactionListItem

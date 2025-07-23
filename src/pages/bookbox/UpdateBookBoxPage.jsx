@@ -1,8 +1,20 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Wrapper } from '@googlemaps/react-wrapper'
-import { tokenService, bookboxesAPI, qrCodeAPI, adminAPI } from '../../services/api'
-import logo from '../../assets/logo.png'
+import { bookboxesAPI, qrCodeAPI, adminAPI } from '../../services/api'
+import { 
+  FiCamera, 
+  FiPower, 
+  FiUserCheck, 
+  FiTrash2, 
+  FiDownload,
+  FiX,
+  FiSearch,
+  FiChevronLeft,
+  FiChevronRight
+} from 'react-icons/fi'
+import AdminHeader from '../../components/ui/AdminHeader/AdminHeader'
+import PageHeader from '../../components/ui/PageHeader/PageHeader'
 import '../MainPage/SubPage.css'
 import './UpdateBookBoxPage.css'
 
@@ -32,8 +44,15 @@ function UpdateBookBoxPage() {
   const [showDeactivateDialog, setShowDeactivateDialog] = useState(false)
   const [showTransferDialog, setShowTransferDialog] = useState(false)
   const [admins, setAdmins] = useState([])
-  const [filteredAdmins, setFilteredAdmins] = useState([])
   const [adminSearchQuery, setAdminSearchQuery] = useState('')
+  const [adminPagination, setAdminPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalResults: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: 8
+  })
   const [isLoadingAdmins, setIsLoadingAdmins] = useState(false)
   const [isTransferring, setIsTransferring] = useState(false)
   const [isToggling, setIsToggling] = useState(false)
@@ -252,17 +271,20 @@ function UpdateBookBoxPage() {
     }
   }
 
-  const handleTransferOwnership = async () => {
-    if (!selectedBookBox) return
-
-    setError('')
+  // Fetch admins with pagination
+  const fetchAdmins = async (query = '', page = 1) => {
     setIsLoadingAdmins(true)
-    
     try {
-      const adminsList = await adminAPI.getAdmins()
-      setAdmins(adminsList)
-      setFilteredAdmins(adminsList)
-      setShowTransferDialog(true)
+      const response = await adminAPI.searchAdmins(query, adminPagination.limit, page)
+      setAdmins(response.admins || [])
+      setAdminPagination(response.pagination || {
+        currentPage: 1,
+        totalPages: 1,
+        totalResults: 0,
+        hasNextPage: false,
+        hasPrevPage: false,
+        limit: 8
+      })
     } catch (err) {
       setError(err.message)
       console.error('Error fetching admins:', err)
@@ -271,18 +293,33 @@ function UpdateBookBoxPage() {
     }
   }
 
-  const handleAdminSearch = (e) => {
-    const query = e.target.value.toLowerCase()
+  const handleTransferOwnership = async () => {
+    if (!selectedBookBox) return
+
+    setError('')
+    setAdminSearchQuery('')
+    setAdminPagination(prev => ({ ...prev, currentPage: 1 }))
+    setShowTransferDialog(true)
+    
+    // Fetch initial admin list
+    await fetchAdmins('', 1)
+  }
+
+  const handleAdminSearch = async (e) => {
+    const query = e.target.value
     setAdminSearchQuery(query)
     
-    if (query.trim() === '') {
-      setFilteredAdmins(admins)
-    } else {
-      const filtered = admins.filter(admin => 
-        admin.username.toLowerCase().includes(query) ||
-        (admin.name && admin.name.toLowerCase().includes(query))
-      )
-      setFilteredAdmins(filtered)
+    // Reset to first page when searching
+    setAdminPagination(prev => ({ ...prev, currentPage: 1 }))
+    
+    // Fetch admins with search query
+    await fetchAdmins(query, 1)
+  }
+
+  const handleAdminPageChange = async (newPage) => {
+    if (newPage >= 1 && newPage <= adminPagination.totalPages) {
+      setAdminPagination(prev => ({ ...prev, currentPage: newPage }))
+      await fetchAdmins(adminSearchQuery, newPage)
     }
   }
 
@@ -309,8 +346,15 @@ function UpdateBookBoxPage() {
   const handleCloseTransferDialog = () => {
     setShowTransferDialog(false)
     setAdmins([])
-    setFilteredAdmins([])
     setAdminSearchQuery('')
+    setAdminPagination({
+      currentPage: 1,
+      totalPages: 1,
+      totalResults: 0,
+      hasNextPage: false,
+      hasPrevPage: false,
+      limit: 8
+    })
   }
 
   const handleCloseDeactivateDialog = () => {
@@ -381,22 +425,8 @@ function UpdateBookBoxPage() {
   if (isLoading) {
     return (
       <div className="subpage-container">
-        <header className="subpage-header">
-          <div className="header-content">
-            <div className="header-left">
-              <img src={logo} alt="Lino Logo" className="header-logo" />
-              <h1 className="subpage-title">Loading...</h1>
-            </div>
-            <div className="header-actions">
-              <button onClick={handleBackToMain} className="back-button">
-                ← Back to Main
-              </button>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
-            </div>
-          </div>
-        </header>
+        <AdminHeader />
+        <PageHeader title="Loading..." />
         <main className="subpage-main">
           <div className="subpage-content">
             <div className="loading-section">
@@ -411,22 +441,8 @@ function UpdateBookBoxPage() {
   if (error && !selectedBookBox) {
     return (
       <div className="subpage-container">
-        <header className="subpage-header">
-          <div className="header-content">
-            <div className="header-left">
-              <img src={logo} alt="Lino Logo" className="header-logo" />
-              <h1 className="subpage-title">Error</h1>
-            </div>
-            <div className="header-actions">
-              <button onClick={handleBackToMain} className="back-button">
-                ← Back to Main
-              </button>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
-            </div>
-          </div>
-        </header>
+        <AdminHeader />
+        <PageHeader title="Error" />
         <main className="subpage-main">
           <div className="subpage-content">
             <div className="error-message">{error}</div>
@@ -442,25 +458,8 @@ function UpdateBookBoxPage() {
 
   return (
     <div className="subpage-container">
-      <header className="subpage-header">
-        <div className="header-content">
-          <div className="header-left">
-            <img src={logo} alt="Lino Logo" className="header-logo" />
-            <h1 className="subpage-title">Update Book Box</h1>
-          </div>
-          <div className="header-actions">
-            <button onClick={handleBackToDetail} className="back-button">
-              ← Back to Details
-            </button>
-            <button onClick={handleBackToMain} className="back-button">
-              ← Main
-            </button>
-            <button onClick={handleLogout} className="logout-button">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+      <AdminHeader />
+      <PageHeader title={`Update: ${selectedBookBox?.name}`} onBack={handleBackToDetail} />
 
       <main className="subpage-main">
         <div className="subpage-content">
@@ -510,7 +509,7 @@ function UpdateBookBoxPage() {
                     <img src={imagePreview} alt="Preview" className="image-preview" />
                   ) : (
                     <div className="upload-placeholder">
-                      <div className="upload-icon">📷</div>
+                      <FiCamera className="upload-icon" />
                       <p>Take Photo or Select Image</p>
                     </div>
                   )}
@@ -547,7 +546,7 @@ function UpdateBookBoxPage() {
                 className="qr-button"
                 disabled={isGeneratingQr}
               >
-                {isGeneratingQr ? 'Generating QR...' : '📱 Generate QR Code'}
+                <FiCamera /> {isGeneratingQr ? 'Generating QR...' : 'Generate QR Code'}
               </button>
               <button 
                 type="button" 
@@ -555,7 +554,7 @@ function UpdateBookBoxPage() {
                 className={selectedBookBox.isActive ? "deactivate-button" : "activate-button"}
                 disabled={isToggling}
               >
-                {isToggling ? 'Processing...' : (selectedBookBox.isActive ? '🔴 Deactivate' : '🟢 Activate')}
+                <FiPower /> {isToggling ? 'Processing...' : (selectedBookBox.isActive ? 'Deactivate' : 'Activate')}
               </button>
               <button 
                 type="button" 
@@ -563,7 +562,7 @@ function UpdateBookBoxPage() {
                 className="transfer-button"
                 disabled={isLoadingAdmins}
               >
-                {isLoadingAdmins ? 'Loading...' : '👤 Transfer Ownership'}
+                <FiUserCheck /> {isLoadingAdmins ? 'Loading...' : 'Transfer Ownership'}
               </button>
               <button 
                 type="button" 
@@ -571,7 +570,7 @@ function UpdateBookBoxPage() {
                 className="delete-button"
                 disabled={isUpdating}
               >
-                Delete Book Box
+                <FiTrash2 /> Delete Book Box
               </button>
             </div>
           </form>
@@ -589,10 +588,10 @@ function UpdateBookBoxPage() {
                 </div>
                 <div className="qr-actions">
                   <button onClick={handleDownloadQR} className="download-button">
-                    📥 Download QR Code
+                    <FiDownload /> Download QR Code
                   </button>
                   <button onClick={handleCloseQR} className="close-qr-button">
-                    Close
+                    <FiX /> Close
                   </button>
                 </div>
               </div>
@@ -651,10 +650,21 @@ function UpdateBookBoxPage() {
                     />
                   </div>
 
+                  {/* Admin List Header */}
+                  {!isLoadingAdmins && (
+                    <div className="admin-list-header">
+                      <p>Showing {admins.length} of {adminPagination.totalResults} admins</p>
+                    </div>
+                  )}
+
                   {/* Admin List */}
                   <div className="admin-list">
-                    {filteredAdmins.length > 0 ? (
-                      filteredAdmins.map((admin) => (
+                    {isLoadingAdmins ? (
+                      <div className="admin-loading">
+                        <p>Loading admins...</p>
+                      </div>
+                    ) : admins.length > 0 ? (
+                      admins.map((admin) => (
                         <div 
                           key={admin.username}
                           className="admin-item"
@@ -673,6 +683,31 @@ function UpdateBookBoxPage() {
                       </div>
                     )}
                   </div>
+
+                  {/* Admin Pagination */}
+                  {!isLoadingAdmins && adminPagination.totalPages > 1 && (
+                    <div className="admin-pagination">
+                      <button 
+                        className="admin-pagination-btn"
+                        onClick={() => handleAdminPageChange(adminPagination.currentPage - 1)}
+                        disabled={!adminPagination.hasPrevPage}
+                      >
+                        <FiChevronLeft /> Previous
+                      </button>
+                      
+                      <div className="admin-pagination-info">
+                        <span>Page {adminPagination.currentPage} of {adminPagination.totalPages}</span>
+                      </div>
+                      
+                      <button 
+                        className="admin-pagination-btn"
+                        onClick={() => handleAdminPageChange(adminPagination.currentPage + 1)}
+                        disabled={!adminPagination.hasNextPage}
+                      >
+                        Next <FiChevronRight />
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div className="dialog-actions">
                   <button 

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { tokenService, transactionsAPI } from '../../services/api'
-import TransactionCard from '../../components/ui/TransactionCard/TransactionCard'
-import logo from '../../assets/logo.png'
+import { transactionsAPI } from '../../services/api'
+import { FiSearch } from 'react-icons/fi'
+import TransactionListItem from '../../components/ui/TransactionListItem/TransactionListItem'
+import AdminHeader from '../../components/ui/AdminHeader/AdminHeader'
+import PageHeader from '../../components/ui/PageHeader/PageHeader'
 import './LookupTransactions.css'
 
 function LookupTransactions() {
@@ -18,14 +20,6 @@ function LookupTransactions() {
   const [error, setError] = useState('')
   const [hasSearched, setHasSearched] = useState(false)
 
-  const handleLogout = () => {
-    tokenService.removeToken()
-    navigate('/')
-  }
-
-  const handleBackToMain = () => {
-    navigate('/main')
-  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -92,22 +86,8 @@ function LookupTransactions() {
 
   return (
     <div className="subpage-container">
-      <header className="subpage-header">
-        <div className="header-content">
-          <div className="header-left">
-            <img src={logo} alt="Lino Logo" className="header-logo" />
-            <h1 className="subpage-title">Lookup Book Transactions</h1>
-          </div>
-          <div className="header-actions">
-            <button onClick={handleBackToMain} className="back-button">
-              ← Back to Main
-            </button>
-            <button onClick={handleLogout} className="logout-button">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+      <AdminHeader />
+      <PageHeader title="Lookup Transactions" />
 
       <main className="subpage-main">
         <div className="subpage-content">
@@ -208,7 +188,7 @@ function LookupTransactions() {
                 {transactions.length > 0 ? (
                   <div className="transactions-list">
                     {transactions.map((transaction, index) => (
-                      <TransactionCard 
+                      <TransactionListItem 
                         key={transaction._id || index} 
                         transaction={transaction} 
                       />
@@ -216,7 +196,7 @@ function LookupTransactions() {
                   </div>
                 ) : (
                   <div className="no-results">
-                    <div className="no-results-icon">🔍</div>
+                    <FiSearch className="no-results-icon" />
                     <p className="no-results-text">
                       No transactions match your search criteria. Try adjusting your filters.
                     </p>

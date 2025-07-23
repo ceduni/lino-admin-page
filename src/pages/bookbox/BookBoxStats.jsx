@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { tokenService, bookboxesAPI, transactionsAPI } from '../../services/api'
-import TransactionCard from '../../components/ui/TransactionCard/TransactionCard'
+import { bookboxesAPI, transactionsAPI } from '../../services/api'
+import TransactionListItem from '../../components/ui/TransactionListItem/TransactionListItem'
 import TransactionGraphs from '../../components/charts/TransactionGraphs/TransactionGraphs'
-import logo from '../../assets/logo.png'
+import AdminHeader from '../../components/ui/AdminHeader/AdminHeader'
+import PageHeader from '../../components/ui/PageHeader/PageHeader'
 import '../MainPage/SubPage.css'
 import './BookBoxDetail.css'
 
@@ -44,15 +45,6 @@ function BookBoxStats() {
       fetchBookBox()
     }
   }, [id])
-
-  const handleLogout = () => {
-    tokenService.removeToken()
-    navigate('/')
-  }
-
-  const handleBackToMain = () => {
-    navigate('/main')
-  }
 
   const handleBackToDetail = () => {
     navigate(`/book-box/${id}`)
@@ -135,22 +127,8 @@ function BookBoxStats() {
   if (isLoading) {
     return (
       <div className="subpage-container">
-        <header className="subpage-header">
-          <div className="header-content">
-            <div className="header-left">
-              <img src={logo} alt="Lino Logo" className="header-logo" />
-              <h1 className="subpage-title">Loading...</h1>
-            </div>
-            <div className="header-actions">
-              <button onClick={handleBackToMain} className="back-button">
-                ← Back to Main
-              </button>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
-            </div>
-          </div>
-        </header>
+        <AdminHeader />
+        <PageHeader title="Loading..." onBack={handleBackToDetail} />
         <main className="subpage-main">
           <div className="subpage-content">
             <div className="loading-section">
@@ -165,25 +143,8 @@ function BookBoxStats() {
   if (error) {
     return (
       <div className="subpage-container">
-        <header className="subpage-header">
-          <div className="header-content">
-            <div className="header-left">
-              <img src={logo} alt="Lino Logo" className="header-logo" />
-              <h1 className="subpage-title">Error</h1>
-            </div>
-            <div className="header-actions">
-              <button onClick={handleBackToDetail} className="back-button">
-                ← Back to Details
-              </button>
-              <button onClick={handleBackToMain} className="back-button">
-                ← Main
-              </button>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
-            </div>
-          </div>
-        </header>
+        <AdminHeader />
+        <PageHeader title="Error" onBack={handleBackToDetail} />
         <main className="subpage-main">
           <div className="subpage-content">
             <div className="error-message">{error}</div>
@@ -199,25 +160,8 @@ function BookBoxStats() {
 
   return (
     <div className="subpage-container">
-      <header className="subpage-header">
-        <div className="header-content">
-          <div className="header-left">
-            <img src={logo} alt="Lino Logo" className="header-logo" />
-            <h1 className="subpage-title">Book Box Statistics</h1>
-          </div>
-          <div className="header-actions">
-            <button onClick={handleBackToDetail} className="back-button">
-              ← Back to Details
-            </button>
-            <button onClick={handleBackToMain} className="back-button">
-              ← Main
-            </button>
-            <button onClick={handleLogout} className="logout-button">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+      <AdminHeader />
+      <PageHeader title={`Stats: ${bookBox?.name}`} onBack={handleBackToDetail} />
 
       <main className="subpage-main">
         <div className="subpage-content">
@@ -308,7 +252,7 @@ function BookBoxStats() {
                     {transactions.length > 0 ? (
                       <div className="transactions-list">
                         {transactions.map((transaction, index) => (
-                          <TransactionCard 
+                          <TransactionListItem 
                             key={transaction._id || index} 
                             transaction={transaction} 
                           />

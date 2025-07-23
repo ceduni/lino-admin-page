@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { tokenService } from './services/api'
 import Login from './pages/auth/Login'
 import MainPage from './pages/MainPage/MainPage'
+import SuperAdminPage from './pages/SuperAdminPage/SuperAdminPage'
 import BookBoxDetail from './pages/bookbox/BookBoxDetail'
 import BookBoxStats from './pages/bookbox/BookBoxStats'
 import RegisterBookBox from './pages/bookbox/RegisterBookBox'
@@ -44,6 +45,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MainPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/super-admin" 
+          element={
+            <ProtectedRoute>
+              <SuperAdminPage />
             </ProtectedRoute>
           } 
         />

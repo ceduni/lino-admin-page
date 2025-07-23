@@ -1,0 +1,52 @@
+/* Page Header with Back Button */
+.page-header {
+  background: #ecf0f1;
+  padding: 1rem 0;
+  border-bottom: 1px solid #bdc3c7;
+}
+
+.page-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.page-header .back-button {
+  background: none;
+  border: none;
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.page-header .back-button:hover {
+  background: #d5dbdb;
+  color: #3498db;
+}
+
+.page-title {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .page-header-content {
+    padding: 0 1rem;
+  }
+  
+  .page-title {
+    font-size: 1rem;
+  }
+}

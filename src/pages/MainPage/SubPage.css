@@ -180,3 +180,68 @@
     font-size: 1rem;
   }
 }
+
+/* Main Page Actions */
+.main-page-actions {
+  background: #ecf0f1;
+  padding: 1rem 0;
+  border-bottom: 1px solid #bdc3c7;
+}
+
+.main-actions-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.create-button {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.create-button:hover {
+  background: #219a52;
+  transform: translateY(-1px);
+}
+
+.transactions-button {
+  background: #f39c12;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.transactions-button:hover {
+  background: #e67e22;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .main-actions-content {
+    padding: 0 1rem;
+    flex-direction: column;
+  }
+  
+  .create-button,
+  .transactions-button {
+    justify-content: center;
+  }
+}

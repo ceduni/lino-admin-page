@@ -1,0 +1,241 @@
+/* Compact Issue Card Styles */
+.issue-card-compact {
+  border: 1px solid;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.issue-card-compact:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.issue-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.issue-card-main-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0; /* Allows text truncation */
+}
+
+.issue-status-compact {
+  flex-shrink: 0;
+}
+
+.status-badge-compact {
+  color: white;
+  padding: 0.25rem 0.6rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.status-badge-compact svg {
+  font-size: 0.8rem;
+}
+
+.issue-subject-compact {
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.issue-date-compact {
+  color: #666;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.expand-chevron {
+  color: #666;
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.issue-card-compact:hover .expand-chevron {
+  color: #3498db;
+}
+
+/* Expanded Content */
+.issue-card-expanded {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+  animation: expandIn 0.3s ease-out;
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+.issue-description-section {
+  margin-bottom: 1rem;
+}
+
+.issue-description-compact {
+  color: #555;
+  line-height: 1.5;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.issue-meta-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.issue-reporter-compact,
+.issue-resolved-compact {
+  color: #666;
+}
+
+.issue-actions-compact {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.issue-action-btn-compact {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.issue-action-btn-compact:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.investigate-btn-compact {
+  background: #f39c12;
+  color: white;
+}
+
+.investigate-btn-compact:hover {
+  background: #e67e22;
+}
+
+.close-btn-compact {
+  background: #27ae60;
+  color: white;
+}
+
+.close-btn-compact:hover {
+  background: #219a52;
+}
+
+.reopen-btn-compact {
+  background: #e74c3c;
+  color: white;
+}
+
+.reopen-btn-compact:hover {
+  background: #c0392b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .issue-card-header {
+    padding: 0.8rem;
+  }
+  
+  .issue-card-main-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .issue-subject-compact {
+    font-size: 0.9rem;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+  
+  .issue-date-compact {
+    font-size: 0.75rem;
+  }
+  
+  .status-badge-compact {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .issue-card-expanded {
+    padding: 0.8rem;
+  }
+  
+  .issue-actions-compact {
+    justify-content: center;
+  }
+  
+  .issue-action-btn-compact {
+    flex: 1;
+    justify-content: center;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .issue-card-main-info {
+    gap: 0.4rem;
+  }
+  
+  .issue-subject-compact {
+    font-size: 0.85rem;
+  }
+  
+  .issue-actions-compact {
+    flex-direction: column;
+  }
+  
+  .issue-action-btn-compact {
+    width: 100%;
+  }
+}

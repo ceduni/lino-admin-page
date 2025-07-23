@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wrapper } from '@googlemaps/react-wrapper'
-import { tokenService, bookboxesAPI, qrCodeAPI } from '../../services/api'
-import logo from '../../assets/logo.png'
+import { bookboxesAPI, qrCodeAPI } from '../../services/api'
+import { FiCamera, FiDownload, FiCheck } from 'react-icons/fi'
+import AdminHeader from '../../components/ui/AdminHeader/AdminHeader'
+import PageHeader from '../../components/ui/PageHeader/PageHeader'
 import '../MainPage/SubPage.css'
 import './RegisterBookBox.css'
 
 function RegisterBookBox() {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    title: '',
+    title: '', 
     infoText: ''
   })
   const [selectedImage, setSelectedImage] = useState(null)
@@ -44,14 +46,6 @@ function RegisterBookBox() {
     }
   }, [])
 
-  const handleLogout = () => {
-    tokenService.removeToken()
-    navigate('/')
-  }
-
-  const handleBackToMain = () => {
-    navigate('/main')
-  }
 
   const handleDownloadQR = () => {
     if (qrCodeData && createdBookBoxName) {
@@ -226,22 +220,8 @@ function RegisterBookBox() {
 
   return (
     <div className="subpage-container">
-      <header className="subpage-header">
-        <div className="header-content">
-          <div className="header-left">
-            <img src={logo} alt="Lino Logo" className="header-logo" />
-            <h1 className="subpage-title">Register New Book Box</h1>
-          </div>
-          <div className="header-actions">
-            <button onClick={handleBackToMain} className="back-button">
-              ← Back to Main
-            </button>
-            <button onClick={handleLogout} className="logout-button">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+      <AdminHeader />
+      <PageHeader title="Register New Book Box" />
 
       <main className="subpage-main">
         <div className="subpage-content">
@@ -293,7 +273,7 @@ function RegisterBookBox() {
                     <img src={imagePreview} alt="Preview" className="image-preview" />
                   ) : (
                     <div className="upload-placeholder">
-                      <div className="upload-icon">📷</div>
+                      <FiCamera className="upload-icon" />
                       <p>Take Photo or Select Image</p>
                     </div>
                   )}
@@ -333,7 +313,7 @@ function RegisterBookBox() {
           {showQrCode && qrCodeUrl && (
             <div className="qr-code-section">
               <div className="success-message">
-                ✅ Book box "{createdBookBoxName}" created successfully!
+                <FiCheck /> Book box "{createdBookBoxName}" created successfully!
               </div>
               <div className="form-section">
                 <h3>QR Code Generated</h3>
@@ -345,7 +325,7 @@ function RegisterBookBox() {
                 </div>
                 <div className="qr-actions">
                   <button onClick={handleDownloadQR} className="download-button">
-                    📥 Download QR Code
+                    <FiDownload /> Download QR Code
                   </button>
                   <button onClick={handleContinueToMain} className="continue-button">
                     Continue to Main

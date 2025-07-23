@@ -30,7 +30,13 @@ function Login() {
           
           if (isAdmin) {
             // User is admin, allow access
-            navigate('/main')
+
+            // If user is super admin, redirect to super admin page
+            if (identifier === import.meta.env.VITE_SUPER_ADMIN_USERNAME) {
+              navigate('/super-admin')
+            } else {
+              navigate('/main')
+            }
           } else {
             // User is not admin, prevent access
             tokenService.removeToken() // Clear the token

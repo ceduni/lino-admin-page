@@ -52,6 +52,8 @@ export const bookboxesAPI = {
     if (filters.q) queryParams.append('q', filters.q);
     if (filters.cls) queryParams.append('cls', filters.cls);
     if (filters.asc) queryParams.append('asc', filters.asc);
+    if (filters.limit) queryParams.append('limit', filters.limit.toString());
+    if (filters.page) queryParams.append('page', filters.page.toString());
 
     const queryString = queryParams.toString();
     const endpoint = `/search/bookboxes/admin${queryString ? `?${queryString}` : ''}`;

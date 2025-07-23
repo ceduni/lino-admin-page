@@ -40,5 +40,11 @@ export const authAPI = {
     });
     console.log(data);
     return data;
+  },
+
+  getCurrentUser: async () => {
+    return await authenticatedRequest('/users', {
+      method: 'GET',
+    });
   }
 };

@@ -1,11 +1,26 @@
 import { authenticatedRequest } from './apiUtils.js';
 
 export const adminAPI = {
-    getAdmins: async () => {
-        const data = await authenticatedRequest('/admin/list', {
+    searchAdmins: async (q = '', limit = 20, page = 1) => {
+        const params = new URLSearchParams();
+        if (q) params.append('q', q);
+        params.append('limit', limit.toString());
+        params.append('page', page.toString());
+
+        const data = await authenticatedRequest(`/search/admins?${params.toString()}`, {
             method: 'GET',
         });
-        return data['admins'] || [];
+        return {
+            admins: data['admins'] || [],
+            pagination: data['pagination'] || {
+                currentPage: 1,
+                totalPages: 1,
+                totalResults: 0,
+                hasNextPage: false,
+                hasPrevPage: false,
+                limit: 20
+            }
+        };
     },
 
     checkAdmin: async () => {
@@ -33,5 +48,27 @@ export const adminAPI = {
             },
             body: JSON.stringify({ username }),
         });
-    }
+    },
+
+    searchUsers: async (q = '', limit = 20, page = 1) => {
+        const params = new URLSearchParams();
+        if (q) params.append('q', q);
+        params.append('limit', limit.toString());
+        params.append('page', page.toString());
+
+        const data = await authenticatedRequest(`/search/users?${params.toString()}`, {
+            method: 'GET',
+        });
+        return {
+            users: data['users'] || [],
+            pagination: data['pagination'] || {
+                currentPage: 1,
+                totalPages: 1,
+                totalResults: 0,
+                hasNextPage: false,
+                hasPrevPage: false,
+                limit: 20
+            }
+        };
+    },
 };

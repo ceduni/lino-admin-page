@@ -1,7 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { tokenService, bookboxesAPI } from '../../services/api'
-import logo from '../../assets/logo.png'
+import { bookboxesAPI, issuesAPI } from '../../services/api'
+import { 
+  FiSettings, 
+  FiBarChart2, 
+  FiAlertCircle,
+  FiCheck,
+  FiChevronLeft,
+  FiChevronRight,
+  FiCheckCircle,
+  FiXCircle
+} from 'react-icons/fi'
+import AdminHeader from '../../components/ui/AdminHeader/AdminHeader'
+import PageHeader from '../../components/ui/PageHeader/PageHeader'
+import IssueCard from '../../components/ui/IssueCard/IssueCard'
 import '../MainPage/SubPage.css'
 import './BookBoxDetail.css'
 
@@ -11,6 +23,19 @@ function BookBoxDetail() {
   const [bookBox, setBookBox] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  
+  // Issues state
+  const [issues, setIssues] = useState([])
+  const [issuesLoading, setIssuesLoading] = useState(false)
+  const [issuesError, setIssuesError] = useState('')
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalResults: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+    limit: 5
+  })
 
   useEffect(() => {
     const fetchBookBox = async () => {
@@ -30,14 +55,40 @@ function BookBoxDetail() {
     }
   }, [id])
 
-  const handleLogout = () => {
-    tokenService.removeToken()
-    navigate('/')
-  }
+  // Fetch issues for this bookbox
+  useEffect(() => {
+    const fetchIssues = async () => {
+      if (!id) return
+      
+      try {
+        setIssuesLoading(true)
+        setIssuesError('')
+        const response = await issuesAPI.searchIssues({
+          bookboxId: id,
+          limit: pagination.limit,
+          page: pagination.currentPage,
+          oldestFirst: false
+        })
+        setIssues(response.issues || [])
+        setPagination(response.pagination || {
+          currentPage: 1,
+          totalPages: 1,
+          totalResults: 0,
+          hasNextPage: false,
+          hasPrevPage: false,
+          limit: 5
+        })
+      } catch (err) {
+        setIssuesError(err.message || 'Failed to load issues')
+        setIssues([])
+      } finally {
+        setIssuesLoading(false)
+      }
+    }
 
-  const handleBackToMain = () => {
-    navigate('/main')
-  }
+    fetchIssues()
+  }, [id, pagination.currentPage])
+
 
   const handleUpdateBookBox = () => {
     navigate(`/update-book-box/${id}`)
@@ -47,25 +98,47 @@ function BookBoxDetail() {
     navigate(`/book-box/${id}/stats`)
   }
 
+  // Issue management functions
+  const handleIssueStatusChange = async (issueId, action) => {
+    try {
+      if (action === 'investigate') {
+        await issuesAPI.investigateIssue(issueId)
+      } else if (action === 'close') {
+        await issuesAPI.closeIssue(issueId)
+      } else if (action === 'reopen') {
+        await issuesAPI.reopenIssue(issueId)
+      }
+      
+      // Refresh issues after status change
+      const response = await issuesAPI.searchIssues({
+        bookboxId: id,
+        limit: pagination.limit,
+        page: pagination.currentPage,
+        oldestFirst: false
+      })
+      setIssues(response.issues || [])
+      setPagination(response.pagination || pagination)
+    } catch (err) {
+      setIssuesError(err.message || 'Failed to update issue status')
+    }
+  }
+
+  // Pagination functions
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPagination(prev => ({
+        ...prev,
+        currentPage: newPage
+      }))
+    }
+  }
+
+
   if (isLoading) {
     return (
       <div className="subpage-container">
-        <header className="subpage-header">
-          <div className="header-content">
-            <div className="header-left">
-              <img src={logo} alt="Lino Logo" className="header-logo" />
-              <h1 className="subpage-title">Loading...</h1>
-            </div>
-            <div className="header-actions">
-              <button onClick={handleBackToMain} className="back-button">
-                ← Back to Main
-              </button>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
-            </div>
-          </div>
-        </header>
+        <AdminHeader />
+        <PageHeader />
         <main className="subpage-main">
           <div className="subpage-content">
             <div className="loading-section">
@@ -80,22 +153,8 @@ function BookBoxDetail() {
   if (error) {
     return (
       <div className="subpage-container">
-        <header className="subpage-header">
-          <div className="header-content">
-            <div className="header-left">
-              <img src={logo} alt="Lino Logo" className="header-logo" />
-              <h1 className="subpage-title">Error</h1>
-            </div>
-            <div className="header-actions">
-              <button onClick={handleBackToMain} className="back-button">
-                ← Back to Main
-              </button>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
-            </div>
-          </div>
-        </header>
+        <AdminHeader />
+        <PageHeader />
         <main className="subpage-main">
           <div className="subpage-content">
             <div className="error-message">{error}</div>
@@ -111,81 +170,133 @@ function BookBoxDetail() {
 
   return (
     <div className="subpage-container">
-      <header className="subpage-header">
-        <div className="header-content">
-          <div className="header-left">
-            <img src={logo} alt="Lino Logo" className="header-logo" />
-            <h1 className="subpage-title">{bookBox.name}</h1>
-          </div>
-          <div className="header-actions">
-            <button onClick={handleBackToMain} className="back-button">
-              ← Back to Main
-            </button>
-            <button onClick={handleLogout} className="logout-button">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
+      <AdminHeader />
+      <PageHeader title={bookBox?.name} />
 
       <main className="subpage-main">
         <div className="subpage-content">
           <div className="bookbox-detail-container">
-            <div className="bookbox-preview-section">
-              <div className="bookbox-preview-card">
-                {bookBox.image && (
-                  <div className="preview-image">
-                    <img src={bookBox.image} alt={bookBox.name} />
-                  </div>
-                )}
-                <div className="detail-info">
-                  <h2>{bookBox.name}</h2>
-                  {bookBox.infoText && (
-                    <p className="info-text">{bookBox.infoText}</p>
-                  )}
-                    <div className="bookbox-meta">
-                      <div className="meta-item">
-                        <span className="meta-label">Books:</span>
-                        <span className="meta-value">{bookBox.bookCount || 0}</span>
+            <div className="main-content-layout">
+              <div className="left-column">
+                <div className="bookbox-preview-section">
+                  <div className="bookbox-preview-card">
+                    {bookBox.image && (
+                      <div className="preview-image">
+                        <img src={bookBox.image} alt={bookBox.name} />
                       </div>
-                      <div className="meta-item">
-                        <span className="meta-label">Location:</span>
-                        <span className="meta-value">
-                          {bookBox.latitude?.toFixed(4)}, {bookBox.longitude?.toFixed(4)}
-                        </span>
-                      </div>
-                      {bookBox.owner && (
-                        <div className="meta-item">
-                          <span className="meta-label">Owner:</span>
-                          <span className="meta-value">{bookBox.owner}</span>
-                        </div>
+                    )}
+                    <div className="detail-info">
+                      <h2>{bookBox.name}</h2>
+                      {bookBox.infoText && (
+                        <p className="info-text">{bookBox.infoText}</p>
                       )}
-                      <div className="meta-item">
-                        <span className="meta-label">Status:</span>
-                        <span className={`meta-value status-${bookBox.isActive ? 'active' : 'inactive'}`}>
-                          {bookBox.isActive ? '🟢 Active' : '🔴 Inactive'}
-                        </span>
-                      </div>
+                        <div className="bookbox-meta">
+                          <div className="meta-item">
+                            <span className="meta-label">Books:</span>
+                            <span className="meta-value">{bookBox.booksCount || 0}</span>
+                          </div>
+                          <div className="meta-item">
+                            <span className="meta-label">Location:</span>
+                            <span className="meta-value">
+                              {bookBox.latitude?.toFixed(4)}, {bookBox.longitude?.toFixed(4)}
+                            </span>
+                          </div>
+                          {bookBox.owner && (
+                            <div className="meta-item">
+                              <span className="meta-label">Owner:</span>
+                              <span className="meta-value">{bookBox.owner}</span>
+                            </div>
+                          )}
+                          <div className="meta-item">
+                            <span className="meta-label">Status:</span>
+                            <span className={`meta-value status-${bookBox.isActive ? 'active' : 'inactive'}`}>
+                              {bookBox.isActive ? <><FiCheckCircle /> Active</> : <><FiXCircle /> Inactive</>}
+                            </span>
+                          </div>
+                        </div>
                     </div>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="action-options">
-              <h3>What would you like to do?</h3>
-              <div className="option-cards">
-                <div className="option-card" onClick={handleUpdateBookBox}>
-                  <div className="option-icon">⚙️</div>
-                  <h4>Update Book Box</h4>
-                  <p>Modify the book box information, location, image, and settings</p>
-                  <button className="option-button">Update</button>
+              <div className="right-column">
+                <div className="action-options">
+                  <h3>Actions</h3>
+                  <div className="action-buttons">
+                    <button className="action-btn" onClick={handleUpdateBookBox}>
+                      <FiSettings className="action-icon" />
+                      <span className="action-text">Update Book Box</span>
+                    </button>
+                    
+                    <button className="action-btn" onClick={handleViewStats}>
+                      <FiBarChart2 className="action-icon" />
+                      <span className="action-text">View Stats</span>
+                    </button>
+                  </div>
                 </div>
-                
-                <div className="option-card" onClick={handleViewStats}>
-                  <div className="option-icon">📊</div>
-                  <h4>View Book Box Stats</h4>
-                  <p>View detailed statistics and analytics for this book box</p>
-                  <button className="option-button">View Stats</button>
+
+                {/* Issues Section */}
+                <div className="issues-section">
+                  <h3><FiAlertCircle className="section-icon" /> Reported Issues</h3>
+                  
+                  {issuesLoading ? (
+                    <div className="issues-loading">
+                      <p>Loading issues...</p>
+                    </div>
+                  ) : issuesError ? (
+                    <div className="issues-error">
+                      <p>Error loading issues: {issuesError}</p>
+                    </div>
+                  ) : issues.length === 0 ? (
+                    <div className="no-issues">
+                      <div className="no-issues-card">
+                        <FiCheck className="no-issues-icon" />
+                        <h4>No Issues Reported</h4>
+                        <p>This book box has no reported issues. Great job!</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="issues-container">
+                      <div className="issues-header">
+                        <p>Showing {issues.length} of {pagination.totalResults} issues</p>
+                      </div>
+                      
+                      <div className="issues-list">
+                        {issues.map((issue) => (
+                          <IssueCard 
+                            key={issue._id} 
+                            issue={issue} 
+                            onStatusChange={handleIssueStatusChange}
+                          />
+                        ))}
+                      </div>
+                      
+                      {/* Pagination */}
+                      {pagination.totalPages > 1 && (
+                        <div className="pagination">
+                          <button 
+                            className="pagination-btn"
+                            onClick={() => handlePageChange(pagination.currentPage - 1)}
+                            disabled={!pagination.hasPrevPage}
+                          >
+                            <FiChevronLeft /> Previous
+                          </button>
+                          
+                          <div className="pagination-info">
+                            <span>Page {pagination.currentPage} of {pagination.totalPages}</span>
+                          </div>
+                          
+                          <button 
+                            className="pagination-btn"
+                            onClick={() => handlePageChange(pagination.currentPage + 1)}
+                            disabled={!pagination.hasNextPage}
+                          >
+                            Next <FiChevronRight />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,0 +1,95 @@
+/* Admin Header */
+.admin-header {
+  background: #2c3e50;
+  border-bottom: 1px solid #34495e;
+  padding: 1rem 0;
+}
+
+.admin-header .header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-header .header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-header .header-logo {
+  height: 40px;
+  width: auto;
+}
+
+.admin-header .header-title {
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.admin-header .header-title:hover {
+  color: #3498db;
+}
+
+.admin-header .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-header .super-admin-button {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.admin-header .super-admin-button:hover {
+  background: linear-gradient(135deg, #8e44ad, #7d3c98);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+}
+
+.admin-header .super-admin-icon {
+  font-size: 1rem;
+}
+
+.admin-header .logout-button {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.admin-header .logout-button:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.admin-header .logout-icon {
+  font-size: 1rem;
+}

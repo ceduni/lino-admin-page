@@ -1,0 +1,74 @@
+.transaction-list-item {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  border-left: 4px solid #3b82f6;
+}
+
+.transaction-list-item:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.transaction-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.transaction-icon {
+  font-size: 24px;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.transaction-text {
+  flex: 1;
+}
+
+.transaction-description {
+  display: block;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.action-word {
+  font-weight: 600;
+}
+
+.bookbox-id-clickable {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #3b82f6;
+  transition: color 0.2s ease;
+}
+
+.bookbox-id-clickable:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.transaction-time {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .transaction-content {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .transaction-icon {
+    min-width: auto;
+  }
+}

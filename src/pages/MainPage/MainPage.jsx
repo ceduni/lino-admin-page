@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { tokenService, bookboxesAPI } from '../../services/api'
-import logo from '../../assets/logo.png'
+import { bookboxesAPI } from '../../services/api'
+import { FiPlus, FiBarChart2 } from 'react-icons/fi'
+import AdminHeader from '../../components/ui/AdminHeader/AdminHeader'
 import './SubPage.css'
 
 function MainPage() {
@@ -38,10 +39,6 @@ function MainPage() {
     }
   }
 
-  const handleLogout = () => {
-    tokenService.removeToken()
-    navigate('/')
-  }
 
   const handleCreateBookBox = () => {
     navigate('/register-book-box')
@@ -87,25 +84,17 @@ function MainPage() {
 
   return (
     <div className="subpage-container">
-      <header className="subpage-header">
-        <div className="header-content">
-          <div className="header-left">
-            <img src={logo} alt="Lino Logo" className="header-logo" />
-            <h1 className="subpage-title">Lino Admin - Book Boxes</h1>
-          </div>
-          <div className="header-actions">
-            <button onClick={handleCreateBookBox} className="create-button">
-              + Create Book Box
-            </button>
-            <button onClick={handleLookupTransactions} className="transactions-button">
-              📊 Transactions
-            </button>
-            <button onClick={handleLogout} className="logout-button">
-              Logout
-            </button>
-          </div>
+      <AdminHeader />
+      <div className="main-page-actions">
+        <div className="main-actions-content">
+          <button onClick={handleCreateBookBox} className="create-button">
+            <FiPlus /> Create Book Box
+          </button>
+          <button onClick={handleLookupTransactions} className="transactions-button">
+            <FiBarChart2 /> Transactions
+          </button>
         </div>
-      </header>
+      </div>
 
       <main className="subpage-main">
         <div className="subpage-content">
@@ -184,7 +173,8 @@ function MainPage() {
                       <h4>{bookBox.name}</h4>
                       {bookBox.infoText && <p className="bookbox-description">{bookBox.infoText}</p>}
                       <div className="bookbox-meta">
-                        <span>Books: {bookBox.bookCount || 0}</span>
+                        <span>Owner: {bookBox.owner || 'Unknown'}</span>
+                        <span>Books: {bookBox.booksCount || 0}</span>
                         <span>Location: {bookBox.latitude?.toFixed(4)}, {bookBox.longitude?.toFixed(4)}</span>
                       </div>
                     </div>
