@@ -129,7 +129,7 @@ function RegisterBookBox() {
       console.log('Book box created successfully:', response)
 
       // Generate QR code with the book box ID
-      const qrBlob = await qrCodeAPI.createQR(response._id.toString())
+      const qrBlob = await qrCodeAPI.createQR('https://ceduni-lino.netlify.app/bookbox/' + response._id.toString())
       const qrUrl = await qrCodeAPI.blobToDataURL(qrBlob)
       
       // Store QR code data and show QR section
