@@ -1,3 +1,3 @@
 # lino-admin-page
 
-[The page](https://lino-admin-page.netlify.app/main)
+[The page](https://lino-admin-page.netlify.app)
