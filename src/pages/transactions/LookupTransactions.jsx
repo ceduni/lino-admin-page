@@ -11,7 +11,7 @@ function LookupTransactions() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState({
     username: '',
-    bookTitle: '',
+    isbn: '',
     bookboxId: '',
     limit: 50
   })
@@ -57,7 +57,7 @@ function LookupTransactions() {
   const handleClearFilters = () => {
     setFilters({
       username: '',
-      bookTitle: '',
+      isbn: '',
       bookboxId: '',
       limit: 50
     })
@@ -108,12 +108,12 @@ function LookupTransactions() {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="bookTitle" className="form-label">Book Title</label>
+                  <label htmlFor="isbn" className="form-label">ISBN</label>
                   <input
                     type="text"
-                    id="bookTitle"
-                    name="bookTitle"
-                    value={filters.bookTitle}
+                    id="isbn"
+                    name="isbn"
+                    value={filters.isbn}
                     onChange={handleInputChange}
                     placeholder="Enter book title"
                     className="form-input"

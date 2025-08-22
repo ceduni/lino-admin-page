@@ -54,7 +54,7 @@ function TransactionListItem({ transaction }) {
             >
               {getActionText(transaction.action)}
             </span>{' '}
-            the book <strong>"{transaction.bookTitle}"</strong>{' '}
+            the book with ISBN <strong>"{transaction.isbn}"</strong>{' '}
             {getPreposition(transaction.action)} book box{' '}
             <span 
               className="bookbox-id-clickable"

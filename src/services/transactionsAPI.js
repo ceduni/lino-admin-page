@@ -5,7 +5,7 @@ export const transactionsAPI = {
     // Build query parameters
     const queryParams = new URLSearchParams();
     if (filters.username) queryParams.append('username', filters.username);
-    if (filters.bookTitle) queryParams.append('bookTitle', filters.bookTitle);
+    if (filters.isbn) queryParams.append('isbn', filters.isbn);
     if (filters.bookboxId) queryParams.append('bookboxId', filters.bookboxId);
     if (filters.limit) queryParams.append('limit', filters.limit.toString());
 

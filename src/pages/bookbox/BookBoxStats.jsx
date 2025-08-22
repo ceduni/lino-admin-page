@@ -18,7 +18,7 @@ function BookBoxStats() {
   // Transaction search states
   const [transactionFilters, setTransactionFilters] = useState({
     username: '',
-    bookTitle: '',
+    isbn: '',
     limit: 50
   })
   const [transactions, setTransactions] = useState([])
@@ -100,8 +100,8 @@ function BookBoxStats() {
       if (transactionFilters.username.trim()) {
         searchFilters.username = transactionFilters.username.trim()
       }
-      if (transactionFilters.bookTitle.trim()) {
-        searchFilters.bookTitle = transactionFilters.bookTitle.trim()
+      if (transactionFilters.isbn.trim()) {
+        searchFilters.isbn = transactionFilters.isbn.trim()
       }
 
       const data = await transactionsAPI.searchTransactions(searchFilters)
@@ -117,7 +117,7 @@ function BookBoxStats() {
   const handleClearTransactionFilters = () => {
     setTransactionFilters({
       username: '',
-      bookTitle: '',
+      isbn: '',
       limit: 50
     })
     // Reload with just the book box ID
@@ -193,14 +193,14 @@ function BookBoxStats() {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="bookTitle">Book Title</label>
+                    <label htmlFor="isbn">ISBN</label>
                     <input
                       type="text"
-                      id="bookTitle"
-                      name="bookTitle"
-                      value={transactionFilters.bookTitle}
+                      id="isbn"
+                      name="isbn"
+                      value={transactionFilters.isbn}
                       onChange={handleTransactionInputChange}
-                      placeholder="Filter by book title"
+                      placeholder="Filter by ISBN"
                     />
                   </div>
                   <div className="form-group">
