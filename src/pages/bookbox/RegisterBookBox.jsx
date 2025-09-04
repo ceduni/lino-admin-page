@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wrapper } from '@googlemaps/react-wrapper'
 import { bookboxesAPI, qrCodeAPI } from '../../services/api'
-import { FiCamera, FiDownload, FiCheck } from 'react-icons/fi'
+import { FiCamera, FiDownload, FiCheck, FiEdit2, FiBook, FiMapPin, FiSave, FiX } from 'react-icons/fi'
 import AdminHeader from '../../components/ui/AdminHeader/AdminHeader'
 import PageHeader from '../../components/ui/PageHeader/PageHeader'
 import '../MainPage/SubPage.css'
@@ -24,6 +24,11 @@ function RegisterBookBox() {
   const [qrCodeUrl, setQrCodeUrl] = useState(null)
   const [createdBookBoxName, setCreatedBookBoxName] = useState('')
   const [showQrCode, setShowQrCode] = useState(false)
+  const [isTitleEditable, setIsTitleEditable] = useState(false)
+  const [isDescriptionEditable, setIsDescriptionEditable] = useState(false)
+  const [tempTitle, setTempTitle] = useState('')
+  const [tempDescription, setTempDescription] = useState('')
+  const [books, setBooks] = useState([]) // Placeholder books
   const mapRef = useRef(null)
   const markerRef = useRef(null)
 
@@ -36,16 +41,69 @@ function RegisterBookBox() {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           })
-          setShouldCenterMap(true) // Only center map for initial geolocation
+          setShouldCenterMap(true)
         },
         (error) => {
           console.warn('Could not get user location:', error)
-          // Keep default location (Toronto)
         }
       )
     }
+
+    // Initialize with placeholder books
+    setBooks([
+      { 
+        id: 1, 
+        title: 'Notes d\'un souterrain', 
+        author: 'Fedor Mikhailovich Dostoev...', 
+        dateAdded: '2 months ago',
+        cover: null
+      },
+      { 
+        id: 2, 
+        title: 'The Design of Everyday Things', 
+        author: 'Don Norman', 
+        dateAdded: '1 month ago',
+        cover: 'https://images-na.ssl-images-amazon.com/images/I/410RTQezHYL._SX326_BO1,204,203,200_.jpg'
+      },
+      { 
+        id: 3, 
+        title: 'Clean Code', 
+        author: 'Robert C. Martin', 
+        dateAdded: '3 weeks ago',
+        cover: null
+      }
+    ])
   }, [])
 
+  const handleTitleEdit = () => {
+    setTempTitle(formData.title)
+    setIsTitleEditable(true)
+  }
+
+  const handleTitleSave = () => {
+    setFormData(prev => ({ ...prev, title: tempTitle }))
+    setIsTitleEditable(false)
+  }
+
+  const handleTitleCancel = () => {
+    setTempTitle('')
+    setIsTitleEditable(false)
+  }
+
+  const handleDescriptionEdit = () => {
+    setTempDescription(formData.infoText)
+    setIsDescriptionEditable(true)
+  }
+
+  const handleDescriptionSave = () => {
+    setFormData(prev => ({ ...prev, infoText: tempDescription }))
+    setIsDescriptionEditable(false)
+  }
+
+  const handleDescriptionCancel = () => {
+    setTempDescription('')
+    setIsDescriptionEditable(false)
+  }
 
   const handleDownloadQR = () => {
     if (qrCodeData && createdBookBoxName) {
@@ -60,14 +118,6 @@ function RegisterBookBox() {
     setQrCodeUrl(null)
     setCreatedBookBoxName('')
     navigate('/main')
-  }
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
   }
 
   const handleImageChange = (e) => {
@@ -219,126 +269,199 @@ function RegisterBookBox() {
   }
 
   return (
-    <div className="subpage-container">
+    <div className="brown-theme">
       <AdminHeader />
-      <PageHeader title="Register New Book Box" />
-
-      <main className="subpage-main">
-        <div className="subpage-content">
-          <form onSubmit={handleSubmit} className="register-form">
-            {error && <div className="error-message">{error}</div>}
-            
-            {/* Title and Info Text Section */}
-            <div className="form-section">
-              <h3>Book Box Information</h3>
-              <div className="form-group">
-                <label htmlFor="title">Title *</label>
+      
+      <div className="phone-container">
+        {/* Title Section with Edit - Now inside phone container */}
+        <div className="title-section">
+          <div className="title-container">
+            {isTitleEditable ? (
+              <div className="title-edit-container">
                 <input
                   type="text"
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
+                  value={tempTitle}
+                  onChange={(e) => setTempTitle(e.target.value)}
+                  className="title-input"
                   placeholder="Enter book box title"
-                  required
+                  autoFocus
                 />
+                <div className="edit-actions">
+                  <button onClick={handleTitleSave} className="save-btn">
+                    <FiSave />
+                  </button>
+                  <button onClick={handleTitleCancel} className="cancel-btn">
+                    <FiX />
+                  </button>
+                </div>
               </div>
-              <div className="form-group">
-                <label htmlFor="infoText">Info Text (Optional)</label>
-                <textarea
-                  id="infoText"
-                  name="infoText"
-                  value={formData.infoText}
-                  onChange={handleInputChange}
-                  placeholder="Enter additional information about this book box"
-                  rows="3"
-                />
+            ) : (
+              <div className="title-display">
+                <h1 className="page-title">
+                  {formData.title || 'New Book Box'}
+                </h1>
+                <button 
+                  className="edit-title-btn"
+                  onClick={handleTitleEdit}
+                  type="button"
+                >
+                  <FiEdit2 />
+                </button>
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
-            {/* Image Upload Section */}
-            <div className="form-section">
-              <h3>Book Box Image</h3>
-              <div className="image-upload-container">
-                <input
-                  type="file"
-                  id="image"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  capture="environment"
-                  className="image-input"
-                />
-                <label htmlFor="image" className="image-upload-label">
-                  {imagePreview ? (
-                    <img src={imagePreview} alt="Preview" className="image-preview" />
-                  ) : (
-                    <div className="upload-placeholder">
-                      <FiCamera className="upload-icon" />
-                      <p>Take Photo or Select Image</p>
+        <main className="subpage-main">
+          <div className="subpage-content">
+            {error && <div className="error-message">{error}</div>}
+            
+            {/* First Container - Book Box Details */}
+            <div className="bookbox-details-container">
+              
+              {/* Image Section */}
+              <div className="image-section">
+                <div className="image-upload-container">
+                  <input
+                    type="file"
+                    id="image"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    capture="environment"
+                    className="image-input"
+                  />
+                  <label htmlFor="image" className="image-upload-label">
+                    {imagePreview ? (
+                      <div className="image-preview-container">
+                        <img src={imagePreview} alt="Preview" className="image-preview" />
+                        <div className="image-overlay">
+                          <FiEdit2 className="edit-image-icon" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="upload-placeholder">
+                        <FiCamera className="upload-icon" />
+                        <p>Tap to add photo</p>
+                      </div>
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              {/* Map Section */}
+              <div className="map-section">
+                <div className="map-wrapper">
+                  <Wrapper apiKey={import.meta.env.VITE_GMAPS_API_KEY}>
+                    <MapComponent />
+                  </Wrapper>
+                </div>
+              </div>
+
+              {/* Description Section */}
+              <div className="description-section">
+                {isDescriptionEditable ? (
+                  <div className="description-edit-container">
+                    <textarea
+                      value={tempDescription}
+                      onChange={(e) => setTempDescription(e.target.value)}
+                      placeholder="Go to the Université de Montréal. Enter the Claire McNicoll building from the west door and the book box will be right in front of you."
+                      className="description-textarea"
+                      rows="4"
+                    />
+                    <div className="edit-actions">
+                      <button onClick={handleDescriptionSave} className="save-btn">
+                        <FiSave />
+                      </button>
+                      <button onClick={handleDescriptionCancel} className="cancel-btn">
+                        <FiX />
+                      </button>
                     </div>
-                  )}
-                </label>
+                  </div>
+                ) : (
+                  <div className="description-display" onClick={handleDescriptionEdit}>
+                    <FiMapPin className="location-icon" />
+                    <p className="description-text">
+                      {formData.infoText || "Go to the Université de Montréal. Enter the Claire McNicoll building from the west door and the book box will be right in front of you."}
+                    </p>
+                    <FiEdit2 className="edit-description-icon" />
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Map Section */}
-            <div className="form-section">
-              <h3>Location</h3>
-              <p className="location-info">
-                Current coordinates: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-              </p>
-              <p className="location-instructions">
-                Click on the map or drag the marker to set the book box location
-              </p>
-              <div className="map-wrapper">
-                <Wrapper apiKey={import.meta.env.VITE_GMAPS_API_KEY}>
-                  <MapComponent />
-                </Wrapper>
+            {/* Second Container - Books Available */}
+            <div className="books-container">
+              <div className="books-header">
+                <FiBook className="books-icon" />
+                <h3>Books Available</h3>
+                <span className="books-count">{books.length}</span>
+              </div>
+              
+              <div className="books-grid">
+                {books.map((book) => (
+                  <div key={book.id} className="book-card">
+                    <div className="book-cover">
+                      {book.cover ? (
+                        <img src={book.cover} alt={book.title} className="book-cover-image" />
+                      ) : (
+                        <div className="book-cover-placeholder">
+                          <FiBook className="book-placeholder-icon" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="book-info">
+                      <h4 className="book-title">{book.title}</h4>
+                      <p className="book-author">{book.author}</p>
+                      <p className="book-date">Added {book.dateAdded}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Submit Button */}
-            <div className="form-actions">
-              <button 
-                type="submit" 
-                className="submit-button"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Creating Book Box...' : 'Create Book Box'}
-              </button>
-            </div>
-          </form>
+            <form onSubmit={handleSubmit}>
+              <div className="form-actions">
+                <button 
+                  type="submit" 
+                  className="submit-button"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Creating Book Box...' : 'Create Book Box'}
+                </button>
+              </div>
+            </form>
 
-          {/* QR Code Section */}
-          {showQrCode && qrCodeUrl && (
-            <div className="qr-code-section">
-              <div className="success-message">
-                <FiCheck /> Book box "{createdBookBoxName}" created successfully!
-              </div>
-              <div className="form-section">
-                <h3>QR Code Generated</h3>
-                <p className="qr-instructions">
-                  Your QR code has been generated. Download it and print it to place on your book box.
-                </p>
-                <div className="qr-code-container">
-                  <img src={qrCodeUrl} alt="QR Code" className="qr-code-image" />
+            {/* QR Code Section */}
+            {showQrCode && qrCodeUrl && (
+              <div className="qr-code-section">
+                <div className="success-message">
+                  <FiCheck /> Book box "{createdBookBoxName}" created successfully!
                 </div>
-                <div className="qr-actions">
-                  <button onClick={handleDownloadQR} className="download-button">
-                    <FiDownload /> Download QR Code
-                  </button>
-                  <button onClick={handleContinueToMain} className="continue-button">
-                    Continue to Main
-                  </button>
+                <div className="qr-content">
+                  <h3>QR Code Generated</h3>
+                  <p className="qr-instructions">
+                    Your QR code has been generated. Download it and print it to place on your book box.
+                  </p>
+                  <div className="qr-code-container">
+                    <img src={qrCodeUrl} alt="QR Code" className="qr-code-image" />
+                  </div>
+                  <div className="qr-actions">
+                    <button onClick={handleDownloadQR} className="download-button">
+                      <FiDownload /> Download QR Code
+                    </button>
+                    <button onClick={handleContinueToMain} className="continue-button">
+                      Continue to Main
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      </main>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   )
 }
-
 
 export default RegisterBookBox
