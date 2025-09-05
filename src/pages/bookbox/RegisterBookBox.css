@@ -1,25 +1,25 @@
-/* Brown Theme Variables */
+/* Blue Theme Variables - matching SubPage.css */
 .brown-theme {
-  --primary-brown: #8B5A2B; /* Medium brown like in the image */
-  --secondary-brown: #F5DEB3; /* Wheat */
-  --dark-brown: #654321; /* Dark brown */
-  --accent-brown: #DEB887; /* Burlywood */
-  --text-brown: #5D4E37; /* Dark brown text */
-  --light-brown: #F5F5DC; /* Beige background */
-  --border-brown: #CD853F; /* Peru */
-  --hover-brown: #A0522D; /* Sienna for hover */
-  --cream: #FDF5E6; /* Old lace */
+  --primary-blue: #558ED5; /* Primary blue matching SubPage */
+  --secondary-blue: #E3F2FD; /* Light blue */
+  --dark-blue: #1E497C; /* Dark blue matching title */
+  --accent-blue: #4a7bc8; /* Accent blue for hover */
+  --text-blue: #2c3e50; /* Dark blue-gray text */
+  --light-blue: #f8fafc; /* Light blue-gray background */
+  --border-blue: #bdc3c7; /* Border blue-gray */
+  --hover-blue: #4a7bc8; /* Hover blue */
+  --cream: #ffffff; /* White */
 }
 
 /* Main container styling */
 .brown-theme {
-  background-color: var(--light-brown);
+  background-color: var(--light-blue);
   min-height: 100vh;
 }
 
 /* Title Section */
 .title-section {
-  background: var(--primary-brown);
+  background: var(--primary-blue);
   padding: 1rem;
   margin-bottom: 1rem;
   position: relative;
@@ -72,10 +72,6 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-.edit-title-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
 .title-edit-container {
   display: flex;
   align-items: center;
@@ -89,7 +85,7 @@
   padding: 0.75rem;
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text-brown);
+  color: var(--text-blue);
   flex-grow: 1;
 }
 
@@ -156,6 +152,7 @@
   overflow: hidden;
   margin-bottom: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
 /* Image Section */
@@ -213,18 +210,18 @@
 }
 
 .upload-placeholder {
-  background: var(--light-brown);
+  background: var(--light-blue);
   height: 200px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--text-brown);
+  color: var(--text-blue);
 }
 
 .upload-icon {
   font-size: 3rem;
-  color: var(--border-brown);
+  color: var(--primary-blue);
   margin-bottom: 0.5rem;
 }
 
@@ -267,25 +264,25 @@
 }
 
 .description-display:hover {
-  background: var(--light-brown);
+  background: var(--secondary-blue);
 }
 
 .location-icon {
-  color: var(--primary-brown);
+  color: var(--primary-blue);
   font-size: 1.25rem;
   margin-top: 0.25rem;
   flex-shrink: 0;
 }
 
 .description-text {
-  color: var(--text-brown);
+  color: var(--text-blue);
   margin: 0;
   line-height: 1.5;
   flex-grow: 1;
 }
 
 .edit-description-icon {
-  color: var(--border-brown);
+  color: var(--primary-blue);
   opacity: 0.6;
   flex-shrink: 0;
   margin-top: 0.25rem;
@@ -301,11 +298,11 @@
 .description-textarea {
   width: 100%;
   padding: 1rem;
-  border: 2px solid var(--border-brown);
+  border: 2px solid var(--border-blue);
   border-radius: 8px;
   font-family: inherit;
   font-size: 1rem;
-  color: var(--text-brown);
+  color: var(--text-blue);
   background: white;
   resize: vertical;
   min-height: 100px;
@@ -314,7 +311,7 @@
 
 .description-textarea:focus {
   outline: none;
-  border-color: var(--primary-brown);
+  border-color: var(--primary-blue);
 }
 
 /* Books Container */
@@ -324,6 +321,7 @@
   padding: 1rem;
   margin-bottom: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
 .books-header {
@@ -332,16 +330,16 @@
   gap: 0.75rem;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid #D1D5DB;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .books-icon {
-  color: var(--primary-brown);
+  color: var(--primary-blue);
   font-size: 1.25rem;
 }
 
 .books-header h3 {
-  color: var(--text-brown);
+  color: var(--dark-blue);
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
@@ -349,7 +347,7 @@
 }
 
 .books-count {
-  background: var(--primary-brown);
+  background: var(--primary-blue);
   color: white;
   font-size: 0.875rem;
   font-weight: 600;
@@ -372,11 +370,13 @@
   text-align: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #f1f5f9;
 }
 
 .book-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(85, 142, 213, 0.15);
+  border-color: var(--primary-blue);
 }
 
 .book-cover {
@@ -397,14 +397,14 @@
 .book-cover-placeholder {
   width: 100%;
   height: 100%;
-  background: var(--accent-brown);
+  background: var(--secondary-blue);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .book-placeholder-icon {
-  color: var(--text-brown);
+  color: var(--primary-blue);
   font-size: 1.5rem;
 }
 
@@ -413,7 +413,7 @@
 }
 
 .book-title {
-  color: var(--text-brown);
+  color: var(--dark-blue);
   font-size: 0.875rem;
   font-weight: 600;
   margin: 0 0 0.25rem 0;
@@ -425,7 +425,7 @@
 }
 
 .book-author {
-  color: #6B7280;
+  color: #64748b;
   font-size: 0.75rem;
   margin: 0 0 0.25rem 0;
   line-height: 1.3;
@@ -436,7 +436,7 @@
 }
 
 .book-date {
-  color: #9CA3AF;
+  color: #94a3b8;
   font-size: 0.75rem;
   margin: 0;
   line-height: 1.3;
@@ -449,7 +449,7 @@
 }
 
 .submit-button {
-  background: var(--primary-brown);
+  background: var(--primary-blue);
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -458,15 +458,15 @@
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(139, 90, 43, 0.3);
+  box-shadow: 0 4px 12px rgba(85, 142, 213, 0.3);
   width: 100%;
   max-width: 300px;
 }
 
 .submit-button:hover:not(:disabled) {
-  background: var(--hover-brown);
+  background: var(--hover-blue);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(139, 90, 43, 0.4);
+  box-shadow: 0 6px 16px rgba(85, 142, 213, 0.4);
 }
 
 .submit-button:disabled {
@@ -482,6 +482,7 @@
   padding: 1.5rem;
   margin-top: 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
 .success-message {
@@ -500,14 +501,14 @@
 }
 
 .qr-content h3 {
-  color: var(--text-brown);
+  color: var(--dark-blue);
   text-align: center;
   margin: 0 0 1rem 0;
 }
 
 .qr-instructions {
   text-align: center;
-  color: #6B7280;
+  color: #64748b;
   margin-bottom: 1.5rem;
   line-height: 1.5;
 }
@@ -520,7 +521,7 @@
 .qr-code-image {
   max-width: 200px;
   width: 100%;
-  border: 2px solid var(--border-brown);
+  border: 2px solid var(--primary-blue);
   border-radius: 12px;
   background: white;
   padding: 1rem;
@@ -551,12 +552,12 @@
 }
 
 .download-button {
-  background: var(--border-brown);
+  background: var(--border-blue);
   color: white;
 }
 
 .continue-button {
-  background: var(--primary-brown);
+  background: var(--primary-blue);
   color: white;
 }
 
@@ -567,11 +568,11 @@
 }
 
 .download-button:hover {
-  background: #B8860B;
+  background: #a0aec0;
 }
 
 .continue-button:hover {
-  background: var(--hover-brown);
+  background: var(--hover-blue);
 }
 
 /* Responsive Design - Header stays normal, phone container adapts */
@@ -605,7 +606,7 @@
 /* Large screens - maintain phone format for form only */
 @media (min-width: 1024px) {
   .phone-container {
-    max-width: 375px;
+    max-width: 700px;
     min-height: 812px; /* iPhone X dimensions */
     margin: 3rem auto;
   }

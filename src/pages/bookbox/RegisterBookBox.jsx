@@ -53,22 +53,22 @@ function RegisterBookBox() {
     setBooks([
       { 
         id: 1, 
-        title: 'Notes d\'un souterrain', 
-        author: 'Fedor Mikhailovich Dostoev...', 
-        dateAdded: '2 months ago',
+        title: 'Placeholder', 
+        author: 'Author 1', 
+        dateAdded: '',
         cover: null
       },
       { 
         id: 2, 
-        title: 'The Design of Everyday Things', 
-        author: 'Don Norman', 
+        title: 'Book', 
+        author: 'Author', 
         dateAdded: '1 month ago',
-        cover: 'https://images-na.ssl-images-amazon.com/images/I/410RTQezHYL._SX326_BO1,204,203,200_.jpg'
+        cover: null
       },
       { 
         id: 3, 
-        title: 'Clean Code', 
-        author: 'Robert C. Martin', 
+        title: 'placeholder 2', 
+        author: 'John Author', 
         dateAdded: '3 weeks ago',
         cover: null
       }
@@ -269,6 +269,7 @@ function RegisterBookBox() {
   }
 
   return (
+    // Theme is BLUE, not BROWN
     <div className="brown-theme">
       <AdminHeader />
       
@@ -364,7 +365,7 @@ function RegisterBookBox() {
                     <textarea
                       value={tempDescription}
                       onChange={(e) => setTempDescription(e.target.value)}
-                      placeholder="Go to the Université de Montréal. Enter the Claire McNicoll building from the west door and the book box will be right in front of you."
+                      placeholder="Click here to add a description for where the bookbox is "
                       className="description-textarea"
                       rows="4"
                     />
@@ -381,41 +382,11 @@ function RegisterBookBox() {
                   <div className="description-display" onClick={handleDescriptionEdit}>
                     <FiMapPin className="location-icon" />
                     <p className="description-text">
-                      {formData.infoText || "Go to the Université de Montréal. Enter the Claire McNicoll building from the west door and the book box will be right in front of you."}
+                      {formData.infoText || "Click here to add a description for where the bookbox is."}
                     </p>
                     <FiEdit2 className="edit-description-icon" />
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Second Container - Books Available */}
-            <div className="books-container">
-              <div className="books-header">
-                <FiBook className="books-icon" />
-                <h3>Books Available</h3>
-                <span className="books-count">{books.length}</span>
-              </div>
-              
-              <div className="books-grid">
-                {books.map((book) => (
-                  <div key={book.id} className="book-card">
-                    <div className="book-cover">
-                      {book.cover ? (
-                        <img src={book.cover} alt={book.title} className="book-cover-image" />
-                      ) : (
-                        <div className="book-cover-placeholder">
-                          <FiBook className="book-placeholder-icon" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="book-info">
-                      <h4 className="book-title">{book.title}</h4>
-                      <p className="book-author">{book.author}</p>
-                      <p className="book-date">Added {book.dateAdded}</p>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
 
